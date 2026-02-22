@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "academic-researcher": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "16dd0121beefcbb1dba0652f0a37fd5511380c8be7ae69270222913483b00bbc"
+    },
     "add-provider-doc": {
       "source": "lobehub/lobehub",
       "sourceType": "github",
@@ -91,6 +96,11 @@
       "sourceType": "github",
       "computedHash": "7ad4985f2787acf35c0c7d277fcf7ffc8ac2363c4402b36649cebc77e9568a0b"
     },
+    "code-reviewer": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "ac45cbe57cf1e5f2110e6a68238c5681f97007904d65b6858daa080dc69d7abc"
+    },
     "commit": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -111,6 +121,11 @@
       "sourceType": "github",
       "computedHash": "d363e68dea793d6a660aaed61a709b7bf579fb9b94978328be468662344437ca"
     },
+    "content-creator": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "8a40efacec188736eb229b9605df4d6a3c9d42e5ec08765e31dd5d2ad2c679cb"
+    },
     "continuity-ledger": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -120,6 +135,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "f359a9e8a03de2404392688e3ad546d601f43480601d85de7db9033b5751fb8f"
+    },
+    "data-analyst": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "4fd5f18349b1eea7d7026e7d8a5d22b7856477ffb6796de9cdc68e374777a8c2"
     },
     "data-fetching": {
       "source": "lobehub/lobehub",
@@ -141,6 +161,21 @@
       "sourceType": "github",
       "computedHash": "06c3ab8bda11ee552ceff112f94180e5e0c93ad6bf783f3c807cc9b330fbf9e4"
     },
+    "debugger": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "609b0b6d79fe21bcb5eb8a01b38f5571b8ae05be826936a312bc04d9c5400193"
+    },
+    "decision-helper": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "ecc452103f3cf850b4d7c9055fc1fe02449fd124ea61f48bd0a1cf83c8538bc0"
+    },
+    "deep-research": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "2d3df26fe507ef612bfbde09ed1c8691e17769b430c91fddd5743cd37f4c5672"
+    },
     "describe-pr": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -161,6 +196,16 @@
       "sourceType": "github",
       "computedHash": "077861bcd91b781d747f0ef0d923a8329e1d0ed3326534db2cfadd07b1009e4c"
     },
+    "editor": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "6956636eab9a2a0f102926ba7ac0cdaffa5fdccb8061a428aec1ae0874b8820b"
+    },
+    "email-drafter": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "8e8a390730cb28f26c61ae0dd1bedc96d80c48be0d8ed107c6ec1a99ab3101e1"
+    },
     "environment-triage": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -176,6 +221,11 @@
       "sourceType": "github",
       "computedHash": "ed8da29eda1272de5b3cb81b51ff0ae160d6fd9f3760b65e351c7e17121fd50a"
     },
+    "fact-checker": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "fb8df7db8d769f67f25a425cb03afe8916da96ac739ba5cf65c5f90faa225531"
+    },
     "firecrawl-scrape": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -185,6 +235,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "067021b6f94cce8ee7182b0745dafc02125e241e62b92dade7a1c8047f712623"
+    },
+    "fullstack-developer": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "d824d75875b289753740c12ba33c005a40f0d996f12d3424cabf1ef9ad4cd1a3"
     },
     "git-commits": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -291,6 +346,11 @@
       "sourceType": "github",
       "computedHash": "b6f2823cbda59d427457427eeab0aff9a9b6760cb50fbbebc181562b04dea0dc"
     },
+    "meeting-notes": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "f2e8df4e4b7e4cf752e50d84fab5f33353f0adf212f128d570be4d1142d1bb40"
+    },
     "microcopy": {
       "source": "lobehub/lobehub",
       "sourceType": "github",
@@ -391,10 +451,20 @@
       "sourceType": "github",
       "computedHash": "f7c3b6facfc2c7543b5583c0c9ffb24f1399bbc92355d4c763c200f9e07b4998"
     },
+    "project-planner": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "62897927d02705437bb82e3f6d622c29e3b43593d84967da60a014b623353f1f"
+    },
     "prove": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "6d438fe497b6a6afc747135d7af97a6c3de68653e440ecda23559f3b65fb2062"
+    },
+    "python-expert": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "7ddc44800aef275b3252ffa65369e214ef2a56603842e3f6721363816eb6b45f"
     },
     "qlty-check": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -531,10 +601,20 @@
       "sourceType": "github",
       "computedHash": "55060514162d3c0d58125294f7e5d14fe660530d702e00876e3917b3190f1f1d"
     },
+    "sprint-planner": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "a3836dd84fe070fb78e777300332c3c9e293718af642518d776eeb66bc8665dd"
+    },
     "store-data-structures": {
       "source": "lobehub/lobehub",
       "sourceType": "github",
       "computedHash": "df2b5007084cd015ea70d2318be20e4b6c104b807ac856dff07a3a4fe072951d"
+    },
+    "strategy-advisor": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "b89ff6935fb1a7607bae1fba36dfe84963c633750048e3db0a085c4f5c3ca79c"
     },
     "sub-agents": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -560,6 +640,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "f2a9d63a9c76db8f4c847e2e366a95151aba49045446930fc25346a4caaeca25"
+    },
+    "technical-writer": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "e1ccd2334efd9b2137844568db30b0a1c6679404b474c216476c59e22ad08c28"
     },
     "test": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -615,6 +700,11 @@
       "source": "lobehub/lobehub",
       "sourceType": "github",
       "computedHash": "db1b635822bd0c3d9a4a96d481ccf8e3852d9b5419e39c5f994ab9653b09491b"
+    },
+    "visualization-expert": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "cd8f8bc48c6790cb3b25a13e7a7b05dccd6fd5213577ca59d3c232282d1e151a"
     },
     "wiring": {
       "source": "parcadei/Continuous-Claude-v3",
