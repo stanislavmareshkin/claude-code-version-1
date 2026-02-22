@@ -1,6 +1,16 @@
 {
   "version": 1,
   "skills": {
+    "add-provider-doc": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "e5af5018e728fadc3d288471b81c119c9e82ea1163f7641ed68736d2210162c6"
+    },
+    "add-setting-env": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "8eccc907d0894be6be051def0162553a4ed1cfada328ca5b83c316fe51506a6d"
+    },
     "agent-context-isolation": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -111,15 +121,20 @@
       "sourceType": "github",
       "computedHash": "f359a9e8a03de2404392688e3ad546d601f43480601d85de7db9033b5751fb8f"
     },
+    "data-fetching": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "52a46e9baedf44267f1323d02f4533fdd99839dd1b10951610643ae8996ba566"
+    },
     "dead-code": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "a8d4f025ee6e04d925e56835c19de1446b4d7ead8e5dfe230e5d54d34a9531ec"
     },
     "debug": {
-      "source": "parcadei/Continuous-Claude-v3",
+      "source": "lobehub/lobehub",
       "sourceType": "github",
-      "computedHash": "1f1cc092979240f091394d91f7fdb891c1d39210fa4e6072c1a64e9e31e8fb8c"
+      "computedHash": "1cfb33a00081de8417b741b680d4fe530c5e259f8610b6c610fc3f366bde0234"
     },
     "debug-hooks": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -131,10 +146,20 @@
       "sourceType": "github",
       "computedHash": "82b5506189ce698157ddbc370a77b91c44e539c79357929573df0c86ec0aebff"
     },
+    "desktop": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "25047b2eedc315aa9f6688f69511a48b8cec40d44bc50a6abcebb6ec6d93a0de"
+    },
     "discovery-interview": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "6f194cd10649bdcb62823f0ae3c43070dad725af451e9de8cc6a9b1404b98656"
+    },
+    "drizzle": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "077861bcd91b781d747f0ef0d923a8329e1d0ed3326534db2cfadd07b1009e4c"
     },
     "environment-triage": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -191,6 +216,16 @@
       "sourceType": "github",
       "computedHash": "f6a1ff19a12cab6cb3d06b06b8ce22b80a7786b34fc0f8dbe393bbcf448ddc27"
     },
+    "hotkey": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "6005d3d861f51ca23c866df930ffdcd5ed8b9573aa11d118c36438f6667533b3"
+    },
+    "i18n": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "b411c62147bb1186721d53f58e6093dfe93a141a4cfe49187869e416bb9c5ea2"
+    },
     "idempotent-redundancy": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -215,6 +250,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "a8af9947ad170cdb62e7087761b75ebc2639b4b60510eda2d78a2261ccf356e0"
+    },
+    "linear": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "e34e90fbd95943e5c82d90fdfea482064bca74701b83463c8868f165a5103041"
     },
     "llm-tuning-patterns": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -251,10 +291,20 @@
       "sourceType": "github",
       "computedHash": "b6f2823cbda59d427457427eeab0aff9a9b6760cb50fbbebc181562b04dea0dc"
     },
+    "microcopy": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "5d1a21b05a4dcacca3e3a8af0abc324dfeaaaae1cd0f070313ed6a15ca7960a1"
+    },
     "migrate": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "dbc6d7bb43d3e61758b19fa11495c3cbd79f3b19b33371425f3e8d9ecad1fe5f"
+    },
+    "modal": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "da9b7c47a9288981d47f0b16c8aa31132e01ebcbc5e53426c88b661cfb8e7ba1"
     },
     "modular-code": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -336,6 +386,11 @@
       "sourceType": "github",
       "computedHash": "b8ae1b3213e429b266fe0ff2666fed47018e7445c7a01f7d895754d43d6da5ed"
     },
+    "project-overview": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "f7c3b6facfc2c7543b5583c0c9ffb24f1399bbc92355d4c763c200f9e07b4998"
+    },
     "prove": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -351,6 +406,11 @@
       "sourceType": "github",
       "computedHash": "424c155ae0f74502732cd82cd635873aa97e8807b78045397a842742a67683ea"
     },
+    "react": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "ec98a32434475c4bd1826b8aa9c62efda8c38030bb9f1450cfd2d736f3af99e6"
+    },
     "recall": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -360,6 +420,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "03dfee2dfe84d953a340d0aa0ca84b9182063e69657034f42eefe959270502f7"
+    },
+    "recent-data": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "c53bad48a021140e76baac533fc04af053bf8c86cf549b776ed8ece3bcc8789b"
     },
     "refactor": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -466,6 +531,11 @@
       "sourceType": "github",
       "computedHash": "55060514162d3c0d58125294f7e5d14fe660530d702e00876e3917b3190f1f1d"
     },
+    "store-data-structures": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "df2b5007084cd015ea70d2318be20e4b6c104b807ac856dff07a3a4fe072951d"
+    },
     "sub-agents": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
@@ -495,6 +565,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "367733eaa960e5da62c85c26c5a36f73dfcd5b878864e91cfad5976aad134ce4"
+    },
+    "testing": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "fd02540d15c87cb7964700bbd5d8065fb6ebca1473181b45cf2b2d172abc84fe"
     },
     "tldr-code": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -526,10 +601,20 @@
       "sourceType": "github",
       "computedHash": "c411540ac7879009656361b6ef32c4027793237c702d25a7611776a7f01fd433"
     },
+    "typescript": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "7f33161bce3aeebc7ab66d385865b79cacfe63d2bdbbb8059c4f17ec653c078c"
+    },
     "validate-agent": {
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "e4b10e5b49c141fc6e53c1fd16293184a87c71df0813dab386cfc10490b4b97d"
+    },
+    "version-release": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "db1b635822bd0c3d9a4a96d481ccf8e3852d9b5419e39c5f994ab9653b09491b"
     },
     "wiring": {
       "source": "parcadei/Continuous-Claude-v3",
@@ -540,6 +625,11 @@
       "source": "parcadei/Continuous-Claude-v3",
       "sourceType": "github",
       "computedHash": "61a37ade703be716304c39e0da1584bf90ab27ed141a0cfd9b5dce95f973bff3"
+    },
+    "zustand": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "computedHash": "ef9a6e8dea1837804918bc6533e52b6e05b4589dbe9c26af692111413328a13c"
     }
   }
 }
