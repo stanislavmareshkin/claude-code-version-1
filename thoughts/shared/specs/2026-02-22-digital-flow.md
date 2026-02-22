@@ -1,129 +1,105 @@
-# Digital Flow — Product Landing Site Specification
+# Digital Flow — Product Specification
 
 ## Executive Summary
 
-Digital Flow is a multi-page SaaS marketing website for a business/productivity software product. The site targets potential customers discovering the product for the first time, with a primary goal of building brand awareness and establishing credibility. Built with Next.js (SSG), it delivers a sleek, professional experience with subtle animations, mobile-first responsive design, and full WCAG 2.1 AA accessibility compliance.
+Digital Flow is a SaaS business productivity tool that needs a modern, brand-awareness-focused marketing website. The site will establish credibility and trust with potential customers through sleek, professional design (Stripe/Linear aesthetic), clear feature communication, and tiered pricing transparency. Built with Next.js (SSG), styled-components, and framer-motion, deployed on Vercel with light/dark mode support.
 
 ## Problem Statement
 
-Digital Flow needs a modern, professional web presence to introduce its business/productivity SaaS product to the market. There is no existing site — this is a greenfield build. The immediate need is brand awareness rather than hard conversion, positioning Digital Flow as a credible, polished player in the productivity tool space. Without this site, potential customers have no way to discover, evaluate, or understand the product.
+Digital Flow is a new SaaS product entering the business productivity space (workflow automation, project management, CRM). It currently has no web presence. Potential customers have no way to discover the product, understand its value proposition, or evaluate its pricing. The site must serve as the primary brand touchpoint — establishing credibility before the product speaks for itself.
+
+**Current state**: No website, no brand presence online.
+**Desired state**: A polished, SEO-optimized multi-page site that positions Digital Flow as a serious, trustworthy player in the productivity SaaS market.
 
 ## Success Criteria
 
-- **Brand perception**: Visitors perceive Digital Flow as a professional, trustworthy SaaS product
-- **Page performance**: Lighthouse score 90+ across all categories (Performance, Accessibility, Best Practices, SEO)
-- **Core Web Vitals**: LCP < 2.5s, FID < 100ms, CLS < 0.1
-- **SEO**: Pages indexed by search engines within 2 weeks of launch
-- **Traffic**: Achieve 1K-10K monthly visitors within the first 6 months
-- **Accessibility**: Pass WCAG 2.1 AA audit
+| Metric | Target | Timeframe |
+|--------|--------|-----------|
+| Site live on custom domain | Launched | 1-2 weeks |
+| Lighthouse Performance score | > 90 | At launch |
+| Lighthouse SEO score | > 95 | At launch |
+| Organic traffic | 1K-10K visitors/mo | First 6 months |
+| Core Web Vitals | All "Good" | At launch |
+| Desktop-first responsive | Fully functional on all devices | At launch |
+| Email list signups | Tracking enabled | At launch |
 
 ## User Personas
 
-### Primary: Prospective Customer
-- **Who**: Business professionals, team leads, or decision-makers evaluating productivity tools
-- **Technical level**: Non-technical to moderately technical
-- **Goals**: Understand what Digital Flow does, evaluate if it fits their needs, compare pricing tiers
-- **Context**: Likely arrived via search, social media, or referral; first impression matters
+### Primary: The Evaluator
+- **Who**: Decision-maker at a small-to-mid-size company (founder, ops lead, PM)
+- **Technical level**: Business-savvy, not necessarily technical
+- **Goal**: Understand what Digital Flow does, whether it fits their needs, and what it costs
+- **Behavior**: Arrives via Google search or referral, scans hero, scrolls features, checks pricing, leaves or bookmarks
+- **Device**: Primarily desktop (during work hours)
+
+### Secondary: The Researcher
+- **Who**: Team member tasked with evaluating tools
+- **Goal**: Compare Digital Flow against competitors, gather info for a report
+- **Behavior**: Deep-reads features, screenshots, pricing comparison — may return multiple times
 
 ## User Journey
 
-### First Visit Flow
-1. **Land on Home page** — See bold hero with headline, subtext, and "Learn More" CTA
-2. **Click "Learn More"** — Navigate to Features page or scroll to product overview
-3. **Browse Features** — Understand key capabilities through visual breakdowns
-4. **Check Pricing** — Compare 2-3 tiered plans with feature comparison table
-5. **Take action** — Fill out a contact/newsletter form, or leave with a strong brand impression
+```
+Landing (Google/Referral)
+    ↓
+Hero Section — "Learn More" CTA
+    ↓
+Features Page — Understand capabilities
+    ↓
+Pricing Page — Evaluate tiers
+    ↓
+Contact/Newsletter — Leave email or inquiry
+    ↓
+Return Visit — Deeper evaluation or share with team
+```
 
-### Navigation
-- Persistent top navbar: Home | Features | Pricing | Contact (form/section)
-- Mobile: Hamburger menu with smooth slide-in
-- Footer: Links, social media, legal pages
+### First Visit Flow (60 seconds)
+1. **0-5s**: Hero loads — headline communicates core value, subtext adds context
+2. **5-15s**: Scroll or click "Learn More" — sees key value propositions
+3. **15-30s**: Navigates to Features — scans capability cards with icons
+4. **30-45s**: Navigates to Pricing — sees 2-3 tiers, understands what they get
+5. **45-60s**: Either leaves (bookmarks) or submits email via newsletter/contact form
 
 ## Functional Requirements
 
 ### Must Have (P0)
 
-- **Home Page**
-  - Hero section with headline, subtext, and primary CTA button ("Learn More" / "See How It Works")
-  - Product overview / value proposition section
-  - Visual previews or illustrations of the product
-  - Footer with navigation links, social icons, and legal links
-  - Acceptance: Hero renders above the fold on all viewports, CTA navigates to Features
+#### Pages
+- **Home page**: Hero section with headline, subtext, CTA; brief feature overview; trust indicators
+- **Features page**: Detailed feature breakdowns with visuals/icons; categorized capabilities
+- **Pricing page**: 2-3 tier cards with feature comparison table; FAQ section
 
-- **Features Page**
-  - Detailed feature breakdowns organized by capability area
-  - Visual elements (icons, illustrations, or screenshots) for each feature
-  - Acceptance: All features have descriptions and visuals, page loads < 3s
+#### Global Elements
+- **Navigation**: Sticky header with logo, page links (Home, Features, Pricing), and CTA button
+- **Footer**: Site links, social links, legal links, newsletter email capture
+- **Dark mode toggle**: Light/dark theme with system preference detection and manual override (persisted in localStorage)
+- **Responsive design**: Desktop-first, fully functional on tablet and mobile
 
-- **Pricing Page**
-  - 2-3 tier pricing cards (e.g., Starter, Pro, Enterprise)
-  - Feature comparison table across tiers
-  - CTA per tier (e.g., "Get Started", "Contact Sales")
-  - Acceptance: Tiers are clearly differentiated, comparison table is readable on mobile
+#### Forms & Integrations
+- **Contact form**: Name, email, message — submitted via third-party service (Formspree/Getform)
+- **Newsletter signup**: Email capture in footer — connected to email marketing tool
+- **Analytics**: Google Analytics 4 tracking on all pages with event tracking on CTAs
 
-- **Global Navigation**
-  - Responsive navbar (desktop: horizontal links, mobile: hamburger menu)
-  - Smooth page transitions
-  - Acceptance: Navigation works on all breakpoints, keyboard accessible
-
-- **Contact/Newsletter Form**
-  - Email capture form (newsletter or waitlist)
-  - Contact form (name, email, message)
-  - Integrated with third-party form service (Formspree or Getform)
-  - Acceptance: Forms submit successfully, validation on required fields, success/error states
-
-- **Responsive Design**
-  - Mobile-first approach
-  - Breakpoints: mobile (< 768px), tablet (768-1024px), desktop (> 1024px)
-  - Acceptance: All pages render correctly across breakpoints
-
-- **Accessibility (WCAG 2.1 AA)**
-  - Semantic HTML structure
-  - Alt text on all images
-  - Keyboard navigation support
-  - Sufficient color contrast ratios (4.5:1 for text, 3:1 for large text)
-  - Focus indicators on interactive elements
-  - ARIA labels where needed
-  - Acceptance: Pass axe-core automated audit with zero AA violations
-
-- **SEO Optimization**
-  - Meta titles and descriptions per page
-  - Open Graph / Twitter Card meta tags
-  - Structured data (Organization schema)
-  - Sitemap.xml and robots.txt
-  - Canonical URLs
-  - Acceptance: Lighthouse SEO score 90+
+#### SEO
+- **Meta tags**: Title, description, OG image per page
+- **Structured data**: Organization schema, Product schema on pricing
+- **Sitemap**: Auto-generated XML sitemap
+- **Robots.txt**: Properly configured
+- **Canonical URLs**: Set on all pages
+- **Semantic HTML**: Proper heading hierarchy, landmarks, alt text
 
 ### Should Have (P1)
-
-- **Subtle Scroll Animations**
-  - Elements fade/slide in as they enter the viewport
-  - Smooth transitions between sections
-  - Respects `prefers-reduced-motion` media query
-  - Acceptance: Animations are smooth (60fps), disabled when reduced motion is preferred
-
-- **Analytics Integration**
-  - Google Analytics 4 (or Mixpanel) tracking
-  - Page view tracking across all pages
-  - Event tracking on CTA clicks and form submissions
-  - Acceptance: Events fire correctly, data appears in analytics dashboard
-
-- **Email Marketing Integration**
-  - Newsletter form submissions forwarded to email marketing tool (Mailchimp, ConvertKit, or SendGrid)
-  - Acceptance: New subscribers appear in the email platform
-
-- **Live Chat Widget**
-  - Third-party chat widget (Intercom, Drift, or Crisp)
-  - Non-intrusive placement (bottom-right corner)
-  - Acceptance: Widget loads, does not block page content, accessible
+- **Animated transitions**: Fade/slide-in on scroll using framer-motion (respects prefers-reduced-motion)
+- **Feature screenshots/illustrations**: Visual representations of the product
+- **Pricing toggle**: Monthly/annual pricing switch
+- **Mobile hamburger menu**: Collapsible navigation on small screens
 
 ### Nice to Have (P2)
-
-- **Blog section** (markdown-powered, for SEO content marketing)
+- **Blog section** (MDX-powered, for SEO content marketing)
 - **Case studies or testimonials section**
-- **Dark mode toggle**
 - **Animated hero illustrations**
-- **Multi-language support (i18n)**
+- **Cookie consent banner** (GDPR compliance)
+- **Live chat widget** (Intercom/Crisp)
 
 ## Technical Architecture
 
@@ -131,14 +107,16 @@ Digital Flow needs a modern, professional web presence to introduce its business
 
 | Layer | Technology | Rationale |
 |-------|-----------|-----------|
-| Framework | Next.js 14+ (App Router, SSG) | File-system routing, SSG for performance, SEO-friendly |
-| Language | JavaScript (ES2022+) | Team preference, lower boilerplate |
-| Styling | styled-components | CSS-in-JS, component scoping, theme support |
-| Animations | framer-motion | Declarative animations, scroll triggers, reduced-motion support |
-| Content | Markdown / MDX | Easy editing in-repo, no CMS overhead |
-| Forms | Formspree or Getform | No backend needed, simple integration |
-| Analytics | Google Analytics 4 | Industry standard, free tier sufficient |
-| Hosting | Vercel | Zero-config Next.js deployment, global CDN |
+| Framework | Next.js 14+ (App Router, SSG) | SEO, file routing, markdown support |
+| Language | JavaScript (ES2022+) | Team preference, lower barrier |
+| Styling | styled-components | CSS-in-JS, scoped styles, theming |
+| Animations | framer-motion | Declarative animations, scroll triggers |
+| Content | MDX (Markdown + JSX) | Easy editing, component embedding |
+| Forms | Formspree or Getform | No backend needed, webhooks |
+| Analytics | Google Analytics 4 | Industry standard, free |
+| Email | Mailchimp/ConvertKit integration | Via form service webhooks |
+| Hosting | Vercel | Zero-config Next.js deployment |
+| Domain | Custom domain (ready) | Connected to Vercel |
 
 ### Project Structure
 
@@ -147,11 +125,11 @@ digital-flow/
 ├── public/
 │   ├── images/
 │   ├── fonts/
-│   ├── sitemap.xml
+│   ├── favicon.ico
 │   └── robots.txt
 ├── src/
 │   ├── app/
-│   │   ├── layout.js          # Root layout (navbar, footer)
+│   │   ├── layout.js          # Root layout with ThemeProvider
 │   │   ├── page.js            # Home page
 │   │   ├── features/
 │   │   │   └── page.js        # Features page
@@ -159,128 +137,102 @@ digital-flow/
 │   │       └── page.js        # Pricing page
 │   ├── components/
 │   │   ├── layout/
-│   │   │   ├── Navbar.js
+│   │   │   ├── Header.js
 │   │   │   ├── Footer.js
+│   │   │   ├── Navigation.js
 │   │   │   └── MobileMenu.js
-│   │   ├── sections/
-│   │   │   ├── Hero.js
-│   │   │   ├── Features.js
-│   │   │   ├── PricingCards.js
-│   │   │   └── ContactForm.js
 │   │   ├── ui/
 │   │   │   ├── Button.js
 │   │   │   ├── Card.js
-│   │   │   ├── Input.js
-│   │   │   └── AnimatedSection.js
-│   │   └── seo/
-│   │       └── MetaTags.js
+│   │   │   ├── Badge.js
+│   │   │   ├── Toggle.js
+│   │   │   └── Input.js
+│   │   ├── sections/
+│   │   │   ├── Hero.js
+│   │   │   ├── FeatureGrid.js
+│   │   │   ├── PricingTable.js
+│   │   │   ├── FAQ.js
+│   │   │   ├── Newsletter.js
+│   │   │   └── ContactForm.js
+│   │   └── shared/
+│   │       ├── ThemeToggle.js
+│   │       ├── Logo.js
+│   │       ├── Icon.js
+│   │       └── SEO.js
 │   ├── styles/
-│   │   ├── theme.js           # Design tokens, colors, spacing
-│   │   └── globalStyles.js    # CSS reset, global styles
+│   │   ├── theme.js           # Light & dark theme tokens
+│   │   ├── GlobalStyles.js    # CSS reset & global styles
+│   │   └── animations.js      # Shared framer-motion variants
 │   ├── content/
-│   │   ├── features.md        # Feature descriptions
-│   │   └── pricing.json       # Pricing tier data
+│   │   ├── features.mdx
+│   │   └── pricing.json
 │   └── lib/
-│       ├── analytics.js       # GA4 helpers
-│       └── constants.js       # Site-wide constants
-├── package.json
+│       ├── analytics.js       # GA4 init & helpers
+│       └── form.js            # Form submission helpers
 ├── next.config.js
-└── README.md
+├── package.json
+└── .env.local                 # API keys (analytics, form service)
 ```
 
-### Design Tokens (Theme)
+### Data Model
 
-```javascript
-const theme = {
-  colors: {
-    primary: '#0066FF',       // Brand blue
-    primaryDark: '#0052CC',
-    secondary: '#1A1A2E',     // Dark navy
-    background: '#FFFFFF',
-    surface: '#F8F9FA',
-    text: '#1A1A2E',
-    textSecondary: '#6B7280',
-    border: '#E5E7EB',
-    success: '#10B981',
-    error: '#EF4444',
-  },
-  fonts: {
-    heading: "'Inter', sans-serif",
-    body: "'Inter', sans-serif",
-  },
-  spacing: {
-    xs: '4px',
-    sm: '8px',
-    md: '16px',
-    lg: '24px',
-    xl: '32px',
-    xxl: '48px',
-    section: '80px',
-  },
-  breakpoints: {
-    mobile: '768px',
-    tablet: '1024px',
-    desktop: '1280px',
-  },
-  borderRadius: {
-    sm: '4px',
-    md: '8px',
-    lg: '16px',
-    full: '9999px',
-  },
-};
-```
+This is a static marketing site — no database. Data lives in:
 
-### Integrations
-
-| Service | Purpose | Integration Method |
-|---------|---------|-------------------|
-| Formspree / Getform | Form submissions | HTTP POST from client-side forms |
-| Google Analytics 4 | Visitor analytics | `<Script>` tag in root layout |
-| Mailchimp / ConvertKit | Email marketing | Formspree webhook or direct API |
-| Intercom / Crisp | Live chat | `<Script>` tag, lazy-loaded |
+| Data | Format | Location |
+|------|--------|----------|
+| Page copy | MDX files | `src/content/` |
+| Feature list | MDX/JSON | `src/content/features.mdx` |
+| Pricing tiers | JSON | `src/content/pricing.json` |
+| Images | Static files | `public/images/` |
+| Theme tokens | JS object | `src/styles/theme.js` |
+| Form submissions | External | Formspree/Getform dashboard |
+| Analytics data | External | GA/Mixpanel dashboard |
+| Email subscribers | External | Mailchimp/ConvertKit dashboard |
 
 ### Security Model
 
 - **No authentication required** — public marketing site
-- **Form validation**: Client-side validation + third-party service handles server-side
-- **CSP headers**: Content Security Policy configured in `next.config.js`
-- **HTTPS**: Enforced via Vercel (automatic)
-- **No sensitive data stored**: Form data handled entirely by third-party services
-- **Dependencies**: Regular `npm audit` checks, Dependabot for automated updates
+- **Form submissions**: CSRF protection via Formspree/Getform built-in tokens
+- **Environment variables**: API keys stored in `.env.local`, never committed
+- **Content Security Policy**: Configured in `next.config.js` headers
+- **HTTPS**: Enforced by Vercel
+- **No user data stored server-side** — all form data in third-party services
 
 ## Non-Functional Requirements
 
-- **Performance**: Lighthouse Performance score 90+, LCP < 2.5s, FID < 100ms, CLS < 0.1
-- **Scalability**: SSG + CDN handles virtually unlimited traffic for a marketing site
-- **Reliability**: 99.9% uptime via Vercel's infrastructure
-- **Security**: HTTPS enforced, CSP headers, no server-side data storage
-- **Accessibility**: WCAG 2.1 AA compliance across all pages
-- **SEO**: Lighthouse SEO score 90+, proper meta tags, structured data, sitemap
-- **Browser support**: Last 2 versions of Chrome, Firefox, Safari, Edge
+| Category | Requirement |
+|----------|-------------|
+| Performance | Lighthouse score > 90, LCP < 2.5s, FID < 100ms, CLS < 0.1 |
+| Scalability | Static site on CDN — handles any traffic spike |
+| SEO | Server-rendered HTML, proper meta tags, structured data, sitemap |
+| Accessibility | Semantic HTML, keyboard navigable, alt text, sufficient contrast |
+| Browser support | Chrome, Firefox, Safari, Edge (last 2 versions) |
+| Responsive | Desktop-first: desktop (1280px+), tablet (768-1279px), mobile (<768px) |
+| Build time | < 30s for full static build |
+| Bundle size | < 200KB initial JS bundle |
 
 ## Out of Scope
 
 - User authentication / login
-- Backend application logic
-- Database or data persistence (beyond third-party form services)
+- Dashboard or app functionality
 - E-commerce / payment processing
-- Blog (P2 — future enhancement)
-- Multi-language / i18n (P2 — future enhancement)
-- Dark mode (P2 — future enhancement)
-- Native mobile app
-- Custom CMS or admin panel
+- Blog (P2 — future addition)
+- Internationalization / multi-language
 - A/B testing infrastructure
+- Customer portal
+- API development
+- Database setup
 
 ## Open Questions for Implementation
 
-1. **Exact copy/content**: Headlines, feature descriptions, and pricing tier details need to be provided or drafted
-2. **Brand assets**: Logo, brand colors (the spec includes placeholder tokens — finalize before build)
-3. **Imagery**: Product screenshots, illustrations, or icons — source needed (custom, stock, or AI-generated)
-4. **Email marketing provider**: Specific choice between Mailchimp, ConvertKit, or SendGrid
-5. **Live chat provider**: Specific choice between Intercom, Drift, or Crisp
-6. **Analytics**: Confirm Google Analytics 4 vs. alternative (Mixpanel, Amplitude)
-7. **Font licensing**: Confirm Inter (open source) or alternative brand font
+1. **Exact product name styling** — "Digital Flow", "DigitalFlow", or "digital flow"?
+2. **Logo** — Does a logo asset exist, or should a text-based logo be used?
+3. **Product screenshots** — Are there product UI screenshots available for the Features page?
+4. **Pricing amounts** — What are the actual tier names and price points?
+5. **Email marketing provider** — Mailchimp or ConvertKit (affects webhook setup)?
+6. **GA4 measurement ID** — Needed for analytics configuration
+7. **Custom domain** — What is the exact domain URL?
+8. **Social media links** — Which platforms to link in the footer?
 
 ## Appendix: Research Findings
 
@@ -294,22 +246,12 @@ Next.js was recommended and accepted based on:
 - **Vercel deployment**: Zero-config deployment, optimized for Next.js
 - **Ecosystem**: Rich library of components, scroll animation integrations (framer-motion)
 
-### Design Direction: Sleek & Professional
+### Design Direction: Sleek & Professional (Stripe/Linear aesthetic)
 
-The "Stripe/Linear" aesthetic implies:
 - Clean typography with generous whitespace
 - Subtle gradients and shadows rather than flat design
 - Restrained color palette with a strong primary accent
 - Micro-interactions that feel polished, not flashy
 - Card-based layouts with clear visual hierarchy
 - Professional photography or clean illustrations over stock imagery
-
-### Accessibility: WCAG 2.1 AA
-
-Full compliance requires attention to:
-- Color contrast ratios on all text elements
-- Keyboard navigation through all interactive elements
-- Screen reader compatibility (ARIA labels, live regions)
-- Form error announcements
-- Skip-to-content links
-- Reduced motion support for animations
+- Light and dark mode as standard
