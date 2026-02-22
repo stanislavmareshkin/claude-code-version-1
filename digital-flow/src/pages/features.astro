@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FeaturesPageWrapper from '../components/pages/FeaturesPageWrapper';
+---
+
+<BaseLayout
+  title="Features | Digital Flow"
+  description="Everything your team needs to manage work, automate workflows, and collaborate effectively."
+>
+  <FeaturesPageWrapper client:only="react" />
+</BaseLayout>

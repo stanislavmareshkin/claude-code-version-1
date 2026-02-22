@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PricingPageWrapper from '../components/pages/PricingPageWrapper';
+---
+
+<BaseLayout
+  title="Pricing | Digital Flow"
+  description="Simple, transparent pricing that scales with your team. Start free, upgrade when you're ready."
+>
+  <PricingPageWrapper client:only="react" />
+</BaseLayout>

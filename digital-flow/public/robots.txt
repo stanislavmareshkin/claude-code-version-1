@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://digitalflow.com/sitemap.xml
+Sitemap: https://digitalflow.com/sitemap-index.xml
