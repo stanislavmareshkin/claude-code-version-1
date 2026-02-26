@@ -12,6 +12,13 @@ The project is Python-based with no application runtime -- it is a library of st
 .claude/
   settings.json                  # Plugin configuration (knowledge-work-plugins)
   skills/
+    automation/
+      telegram-google-sheets-sender/  # Google Sheets -> Telegram sender
+        SKILL.md
+        .env.example
+        requirements.txt
+        scripts/
+          sender_google_sheet.py
     creative-design/
       ui-design-system/          # UI design token generation toolkit
         SKILL.md
@@ -28,6 +35,7 @@ The project is Python-based with no application runtime -- it is a library of st
           api_scaffolder.py
           api_load_tester.py
           database_migration_tool.py
+.gitignore
 CLAUDE.md                        # This file
 ```
 
@@ -93,10 +101,25 @@ python .claude/skills/development/senior-backend/scripts/database_migration_tool
 python .claude/skills/development/senior-backend/scripts/api_load_tester.py <target-path> [--verbose] [--json] [--output file]
 ```
 
+#### 3. Telegram Google Sheets Sender (`automation/telegram-google-sheets-sender`)
+
+Reads recipients and messages from a Google Sheet, sends via Telegram Bot API, writes statuses back.
+
+```bash
+pip install -r .claude/skills/automation/telegram-google-sheets-sender/requirements.txt
+
+export TELEGRAM_BOT_TOKEN="..."
+export GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/..."
+python .claude/skills/automation/telegram-google-sheets-sender/scripts/sender_google_sheet.py
+```
+
+Required Google Sheet columns: `Chat_ID`, `Message`. Optional: `Parse_Mode`, `Status`, `Sent_At`, `Last_Error`.
+
 ## Tech Stack
 
-- **Language**: Python 3 (standard library only -- no external dependencies)
-- **Key modules**: `json`, `argparse`, `pathlib`, `colorsys`, `sys`, `os`
+- **Language**: Python 3
+- **Core skills**: standard library only (`json`, `argparse`, `pathlib`, `colorsys`, `sys`, `os`)
+- **Automation skills**: `gspread`, `requests` (see per-skill `requirements.txt`)
 - **Plugins**: Anthropic knowledge-work-plugins (11 plugins)
 
 ## Development Conventions

@@ -1,0 +1,15 @@
+# Secrets and credentials
+.env
+*.env
+service_account.json
+*-credentials.json
+*-service-account.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
