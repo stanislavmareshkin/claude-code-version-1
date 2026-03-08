@@ -1,34 +1,67 @@
-# Design Patterns
+# Common Patterns
 
-## Preferred Patterns
+## Skeleton Projects
 
-- **Early returns** — Reduce nesting, handle edge cases first
-- **Composition over inheritance** — Prefer composing behaviors
-- **Dependency injection** — Pass dependencies, don't hardcode them
-- **Single responsibility** — Each module/class/function does one thing
-- **Fail fast** — Validate inputs early, throw errors immediately
+When implementing new functionality:
+1. Search for battle-tested skeleton projects
+2. Evaluate options for security, extensibility, relevance
+3. Clone best match as foundation
+4. Iterate within proven structure
 
-## Error Handling
+## Design Patterns
 
-- Use typed/custom errors for different failure modes
-- Handle errors at the appropriate level
-- Don't swallow errors silently
-- Log errors with context (what was being done, what failed)
-- Provide actionable error messages
+### Repository Pattern
 
-## API Design
+Encapsulate data access behind a consistent interface:
+- Define standard operations: findAll, findById, create, update, delete
+- Concrete implementations handle storage details
+- Business logic depends on abstract interface, not storage mechanism
+- Enables easy swapping of data sources and simplifies testing
 
-- Use consistent naming conventions
-- Return appropriate HTTP status codes
-- Validate inputs at system boundaries
-- Version APIs when breaking changes are needed
-- Document public APIs
+### API Response Format
 
-## Anti-patterns to Avoid
+Use a consistent envelope for all API responses:
+- Include a success/status indicator
+- Include the data payload (nullable on error)
+- Include an error message field (nullable on success)
+- Include metadata for paginated responses (total, page, limit)
 
-- God objects / God functions
-- Premature optimization
-- Premature abstraction
-- Magic numbers / magic strings
-- Deep inheritance hierarchies
-- Circular dependencies
+### Early Returns
+
+Reduce nesting by handling edge cases first:
+
+```python
+# BAD: Deep nesting
+def process(data):
+    if data:
+        if data.valid:
+            if data.ready:
+                return do_work(data)
+    return None
+
+# GOOD: Early returns
+def process(data):
+    if not data:
+        return None
+    if not data.valid:
+        return None
+    if not data.ready:
+        return None
+    return do_work(data)
+```
+
+### Dependency Injection
+
+Pass dependencies, don't hardcode them:
+
+```python
+# BAD
+class UserService:
+    def __init__(self):
+        self.db = Database()  # hardcoded
+
+# GOOD
+class UserService:
+    def __init__(self, db: Database):
+        self.db = db  # injected
+```

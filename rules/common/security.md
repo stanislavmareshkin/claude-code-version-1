@@ -1,43 +1,29 @@
-# Security Rules
+# Security Guidelines
 
-## Secrets Management
+## Mandatory Security Checks
 
-- NEVER hardcode secrets, API keys, tokens, or passwords
-- Use environment variables or secret managers
-- Add `.env` files to `.gitignore`
-- Rotate compromised credentials immediately
+Before ANY commit:
+- [ ] No hardcoded secrets (API keys, passwords, tokens)
+- [ ] All user inputs validated
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (sanitized HTML)
+- [ ] CSRF protection enabled
+- [ ] Authentication/authorization verified
+- [ ] Rate limiting on all endpoints
+- [ ] Error messages don't leak sensitive data
 
-## Input Validation
+## Secret Management
 
-- Validate ALL external input (user input, API responses, file contents)
-- Use allowlists over denylists
-- Sanitize data before rendering (prevent XSS)
-- Parameterize database queries (prevent SQL injection)
-- Validate file paths (prevent path traversal)
+- NEVER hardcode secrets in source code
+- ALWAYS use environment variables or a secret manager
+- Validate that required secrets are present at startup
+- Rotate any secrets that may have been exposed
 
-## Authentication & Authorization
+## Security Response Protocol
 
-- Use established libraries (don't roll your own crypto)
-- Implement proper session management
-- Apply principle of least privilege
-- Validate permissions on every request
-
-## Dependencies
-
-- Keep dependencies updated
-- Audit for known vulnerabilities (`npm audit`, `pip audit`)
-- Pin dependency versions in production
-- Review new dependencies before adding
-
-## OWASP Top 10 Awareness
-
-- Injection (SQL, command, XSS)
-- Broken authentication
-- Sensitive data exposure
-- XML external entities (XXE)
-- Broken access control
-- Security misconfiguration
-- Cross-site scripting (XSS)
-- Insecure deserialization
-- Using components with known vulnerabilities
-- Insufficient logging and monitoring
+If security issue found:
+1. STOP immediately
+2. Use **security-reviewer** agent
+3. Fix CRITICAL issues before continuing
+4. Rotate any exposed secrets
+5. Review entire codebase for similar issues

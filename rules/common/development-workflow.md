@@ -1,29 +1,31 @@
 # Development Workflow
 
-## Before Starting
+## Feature Implementation Workflow
 
-1. Understand the requirement fully before coding
-2. Check existing code for similar patterns
-3. Plan the approach — use `/plan` for complex changes
-4. Create a checkpoint: `/checkpoint create "before-feature"`
+0. **Research & Reuse** (mandatory before any new implementation)
+   - Search codebase first for existing implementations and patterns
+   - Check package registries before writing utility code
+   - Prefer battle-tested libraries over hand-rolled solutions
+   - Look for open-source projects that solve 80%+ of the problem
 
-## During Development
+1. **Plan First**
+   - Use **planner** agent to create implementation plan
+   - Identify dependencies and risks
+   - Break down into phases
 
-1. Work in small, incremental steps
-2. Commit frequently with descriptive messages
-3. Run tests after every change
-4. Keep the build green at all times
+2. **TDD Approach**
+   - Use **tdd-guide** agent
+   - Write tests first (RED)
+   - Implement to pass tests (GREEN)
+   - Refactor (IMPROVE)
+   - Verify 80%+ coverage
 
-## Before Committing
+3. **Code Review**
+   - Use **code-reviewer** agent immediately after writing code
+   - Address CRITICAL and HIGH issues
+   - Fix MEDIUM issues when possible
 
-1. Run `/verify` to check build, types, lint, tests
-2. Review your own diff: `git diff`
-3. Run `/code-review` for quality checks
-4. Remove debug statements (console.log, print, etc.)
-
-## Before PR
-
-1. Run `/verify pre-pr` for full verification
-2. Ensure all tests pass
-3. Update documentation if needed
-4. Create descriptive PR title and description
+4. **Commit & Push**
+   - Detailed commit messages
+   - Follow conventional commits format
+   - See git-workflow.md for commit message format and PR process
