@@ -10,6 +10,7 @@
 import json
 import sys
 import os
+import time
 import urllib.request
 import urllib.error
 
@@ -62,29 +63,90 @@ BASE_URL = f"https://{MAKE_ZONE}.make.com/api/v2"
 HEADERS = {
     "Authorization": f"Token {MAKE_API_TOKEN}",
     "Content-Type": "application/json",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json",
 }
 
+MAX_RETRIES = 4
+RETRY_DELAYS = [2, 4, 8, 16]
+
 
 def api_request(method, path, data=None):
-    """Выполняет запрос к Make.com API."""
+    """Выполняет запрос к Make.com API с повторными попытками при сетевых ошибках."""
     url = f"{BASE_URL}{path}"
     body = json.dumps(data).encode() if data else None
     req = urllib.request.Request(url, data=body, headers=HEADERS, method=method)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read().decode())
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode()
-        print(f"  Ошибка {e.code}: {error_body}")
+
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode()
+            if e.code == 401:
+                print(f"  Ошибка 401: Неверный API-токен Make.com.")
+                print(f"  Текущий токен: {MAKE_API_TOKEN[:12]}...")
+                print()
+                print("  Как получить правильный токен:")
+                print(f"  1. Откройте https://{MAKE_ZONE}.make.com")
+                print("  2. Войдите в аккаунт")
+                print("  3. Нажмите на аватар (внизу слева) → Profile")
+                print("  4. Перейдите во вкладку API Access")
+                print("  5. Нажмите 'Add token', выберите нужные scopes (все), нажмите Save")
+                print("  6. Скопируйте токен и вставьте в .env файл как MAKE_API_TOKEN=...")
+                sys.exit(1)
+            elif e.code == 403:
+                print(f"  Ошибка 403: Доступ запрещён.")
+                try:
+                    err = json.loads(error_body)
+                    if err.get("code") == 1010 or "cloudflare" in error_body.lower():
+                        print("  Запрос заблокирован Cloudflare.")
+                        print(f"  Проверьте, что регион MAKE_ZONE={MAKE_ZONE} указан верно.")
+                except (json.JSONDecodeError, KeyError):
+                    pass
+                print(f"  Ответ: {error_body}")
+                sys.exit(1)
+            else:
+                print(f"  Ошибка {e.code}: {error_body}")
+                sys.exit(1)
+        except (urllib.error.URLError, ConnectionError, OSError) as e:
+            if attempt < MAX_RETRIES:
+                delay = RETRY_DELAYS[attempt]
+                print(f"  Сетевая ошибка: {e}. Повтор через {delay}с ({attempt + 1}/{MAX_RETRIES})...")
+                time.sleep(delay)
+            else:
+                print(f"  Сетевая ошибка после {MAX_RETRIES} попыток: {e}")
+                sys.exit(1)
+
+
+def validate_config():
+    """Проверяет конфигурацию перед запуском."""
+    if not MAKE_API_TOKEN:
+        print("  ОШИБКА: MAKE_API_TOKEN не задан в .env файле.")
+        print(f"  Получите токен: https://{MAKE_ZONE}.make.com → Profile → API Access")
         sys.exit(1)
+
+    # UUID формат (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) — не является токеном Make.com
+    import re
+    if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', MAKE_API_TOKEN, re.IGNORECASE):
+        print("  ПРЕДУПРЕЖДЕНИЕ: MAKE_API_TOKEN похож на UUID, а не на токен Make.com.")
+        print("  Токены Make.com обычно длиннее и имеют другой формат.")
+        print(f"  Получите правильный токен: https://{MAKE_ZONE}.make.com → Profile → API Access")
+        print()
+
+    if not ANTHROPIC_API_KEY:
+        print("  ПРЕДУПРЕЖДЕНИЕ: ANTHROPIC_API_KEY не задан — Claude не будет работать в сценарии.")
+    if not GOOGLE_AI_API_KEY:
+        print("  ПРЕДУПРЕЖДЕНИЕ: GOOGLE_AI_API_KEY не задан — генерация изображений не будет работать.")
+    if not TELEGRAM_BOT_TOKEN:
+        print("  ПРЕДУПРЕЖДЕНИЕ: TELEGRAM_BOT_TOKEN не задан — Telegram-публикация не будет работать.")
 
 
 def main():
     print("=" * 50)
     print("  Настройка сценария Make.com")
     print("=" * 50)
+
+    validate_config()
 
     # 1. Получаем организацию и команду
     print("\n[1/5] Получаю информацию об аккаунте...")
