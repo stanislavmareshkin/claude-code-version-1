@@ -41,6 +41,7 @@ MAKE_ZONE = os.getenv("MAKE_ZONE", "eu2")
 # API-ключи загружаются из .env файла (см. .env.example)
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Telegram (обязательно)
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -189,6 +190,7 @@ def main():
 
     variables = {
         "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
+        "OPENAI_API_KEY": OPENAI_API_KEY,
         "GOOGLE_AI_API_KEY": GOOGLE_AI_API_KEY,
         "TELEGRAM_BOT_TOKEN": TELEGRAM_BOT_TOKEN,
         "TELEGRAM_CHAT_ID": TELEGRAM_CHAT_ID,
@@ -203,17 +205,18 @@ def main():
     active_vars = {k: v for k, v in variables.items() if v}
 
     if active_vars:
+        # Make.com хранит переменные сценария в поле metadata.variables blueprint'а
+        # Формат: массив объектов {name, value} внутри blueprint JSON
+        updated_blueprint = json.loads(json.dumps(blueprint))
+        if "metadata" not in updated_blueprint:
+            updated_blueprint["metadata"] = {}
+        updated_blueprint["metadata"]["variables"] = [
+            {"name": k, "value": v}
+            for k, v in active_vars.items()
+        ]
+
         var_update = {
-            "blueprint": json.dumps({
-                **blueprint,
-                "metadata": {
-                    **blueprint.get("metadata", {}),
-                    "variables": [
-                        {"name": k, "value": v}
-                        for k, v in active_vars.items()
-                    ]
-                }
-            })
+            "blueprint": json.dumps(updated_blueprint)
         }
         api_request("PATCH", f"/scenarios/{scenario_id}", var_update)
         print(f"  Установлено {len(active_vars)} переменных:")
@@ -221,7 +224,7 @@ def main():
             masked = active_vars[k][:8] + "..." if len(active_vars[k]) > 8 else "***"
             print(f"    - {k}: {masked}")
     else:
-        print("  Переменные не заданы — заполните их в скрипте!")
+        print("  Переменные не заданы — заполните их в .env файле!")
 
     # 4. Проверяем статус
     print("\n[4/5] Проверяю сценарий...")

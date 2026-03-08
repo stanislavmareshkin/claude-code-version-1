@@ -1,5 +1,5 @@
 {
-  "name": "Автопостинг: Telegram + VK + VC.ru + Яндекс Дзен (Claude + Imagen)",
+  "name": "Автопостинг: Telegram + VK + VC.ru + Яндекс Дзен (Claude + DALL-E)",
   "flow": [
     {
       "id": 1,
@@ -11,10 +11,7 @@
       },
       "mapper": {},
       "metadata": {
-        "designer": {
-          "x": 0,
-          "y": 0
-        },
+        "designer": { "x": 0, "y": 0 },
         "restore": {},
         "expect": []
       }
@@ -23,44 +20,37 @@
       "id": 2,
       "module": "http:ActionSendData",
       "version": 3,
-      "parameters": {},
+      "parameters": {
+        "handleErrors": true,
+        "useNewZLibDeCompress": true
+      },
       "mapper": {
         "url": "https://api.anthropic.com/v1/messages",
-        "method": "POST",
+        "method": "post",
         "headers": [
-          {
-            "name": "x-api-key",
-            "value": "{{ifempty(variables.ANTHROPIC_API_KEY; \"\")}}"
-          },
-          {
-            "name": "anthropic-version",
-            "value": "2023-06-01"
-          },
-          {
-            "name": "Content-Type",
-            "value": "application/json"
-          }
+          { "name": "x-api-key", "value": "{{ifempty(variables.ANTHROPIC_API_KEY; \"\")}}" },
+          { "name": "anthropic-version", "value": "2023-06-01" },
+          { "name": "Content-Type", "value": "application/json" }
         ],
         "qs": [],
         "bodyType": "raw",
         "contentType": "application/json",
-        "body": "{\"model\": \"claude-sonnet-4-6\", \"max_tokens\": 2000, \"temperature\": 0.8, \"system\": \"Ты — SMM-специалист. Генерируй посты для соцсетей на русском языке. Ответ верни строго в JSON формате:\\n{\\n  \\\"title\\\": \\\"заголовок поста\\\",\\n  \\\"text_short\\\": \\\"короткий текст для Telegram и VK (до 500 символов)\\\",\\n  \\\"text_long\\\": \\\"длинный текст для VC.ru и Дзен (800-1500 символов)\\\",\\n  \\\"hashtags\\\": \\\"#хештег1 #хештег2 #хештег3\\\",\\n  \\\"image_prompt\\\": \\\"описание картинки на английском для генерации через AI (1 предложение)\\\"\\n}\", \"messages\": [{\"role\": \"user\", \"content\": \"Напиши пост на тему бизнеса и технологий. Тема на твой выбор. Формат ответа — только JSON, без markdown.\"}]}"
+        "body": "{\"model\": \"claude-sonnet-4-5-20241022\", \"max_tokens\": 2000, \"temperature\": 0.8, \"system\": \"Ты — SMM-специалист. Генерируй посты для соцсетей на русском языке. Ответ верни строго в JSON формате без markdown-обёрток (без ```json):\\n{\\n  \\\"title\\\": \\\"заголовок поста\\\",\\n  \\\"text_short\\\": \\\"короткий текст для Telegram и VK (до 500 символов)\\\",\\n  \\\"text_long\\\": \\\"длинный текст для VC.ru и Дзен (800-1500 символов)\\\",\\n  \\\"hashtags\\\": \\\"#хештег1 #хештег2 #хештег3\\\",\\n  \\\"image_prompt\\\": \\\"detailed image description in English for DALL-E, photorealistic style, 1 sentence\\\"\\n}\", \"messages\": [{\"role\": \"user\", \"content\": \"Напиши пост на тему бизнеса и технологий. Тема на твой выбор. Формат ответа — только JSON, без markdown.\"}]}",
+        "parseResponse": true,
+        "shareCookies": false,
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "followAllRedirects": false
       },
       "metadata": {
-        "designer": {
-          "x": 300,
-          "y": 0
-        },
+        "designer": { "x": 300, "y": 0 },
         "restore": {},
-        "expect": [
-          {
-            "name": "data",
-            "type": "text",
-            "label": "Response body"
-          }
-        ],
+        "expect": [],
         "parameters": [],
-        "label": "Claude Sonnet 4.6 — генерация текста"
+        "label": "Claude — генерация текста"
       }
     },
     {
@@ -72,16 +62,10 @@
         "json": "{{2.data}}"
       },
       "metadata": {
-        "designer": {
-          "x": 550,
-          "y": 0
-        },
+        "designer": { "x": 550, "y": 0 },
         "restore": {},
         "expect": [
-          {
-            "name": "content",
-            "type": "array"
-          }
+          { "name": "content", "type": "array" }
         ],
         "label": "Parse Claude Response"
       }
@@ -92,35 +76,17 @@
       "version": 1,
       "parameters": {},
       "mapper": {
-        "json": "{{3.content[0].text}}"
+        "json": "{{3.content[].text}}"
       },
       "metadata": {
-        "designer": {
-          "x": 750,
-          "y": 0
-        },
+        "designer": { "x": 750, "y": 0 },
         "restore": {},
         "expect": [
-          {
-            "name": "title",
-            "type": "text"
-          },
-          {
-            "name": "text_short",
-            "type": "text"
-          },
-          {
-            "name": "text_long",
-            "type": "text"
-          },
-          {
-            "name": "hashtags",
-            "type": "text"
-          },
-          {
-            "name": "image_prompt",
-            "type": "text"
-          }
+          { "name": "title", "type": "text" },
+          { "name": "text_short", "type": "text" },
+          { "name": "text_long", "type": "text" },
+          { "name": "hashtags", "type": "text" },
+          { "name": "image_prompt", "type": "text" }
         ],
         "label": "Parse Post JSON"
       }
@@ -129,41 +95,36 @@
       "id": 9,
       "module": "http:ActionSendData",
       "version": 3,
-      "parameters": {},
+      "parameters": {
+        "handleErrors": true,
+        "useNewZLibDeCompress": true
+      },
       "mapper": {
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict",
-        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "method": "post",
         "headers": [
-          {
-            "name": "Content-Type",
-            "value": "application/json"
-          }
+          { "name": "Authorization", "value": "Bearer {{ifempty(variables.OPENAI_API_KEY; \"\")}}" },
+          { "name": "Content-Type", "value": "application/json" }
         ],
-        "qs": [
-          {
-            "name": "key",
-            "value": "{{ifempty(variables.GOOGLE_AI_API_KEY; \"\")}}"
-          }
-        ],
+        "qs": [],
         "bodyType": "raw",
         "contentType": "application/json",
-        "body": "{\"instances\": [{\"prompt\": \"{{10.image_prompt}}\"}], \"parameters\": {\"sampleCount\": 1, \"aspectRatio\": \"16:9\", \"language\": \"en\"}}"
+        "body": "{\"model\": \"dall-e-3\", \"prompt\": \"{{10.image_prompt}}\", \"n\": 1, \"size\": \"1792x1024\", \"quality\": \"standard\"}",
+        "parseResponse": true,
+        "shareCookies": false,
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "followAllRedirects": false
       },
       "metadata": {
-        "designer": {
-          "x": 1000,
-          "y": 0
-        },
+        "designer": { "x": 1000, "y": 0 },
         "restore": {},
-        "expect": [
-          {
-            "name": "data",
-            "type": "text",
-            "label": "Response body (base64 image)"
-          }
-        ],
+        "expect": [],
         "parameters": [],
-        "label": "Imagen (Nano Banana 2) — генерация картинки"
+        "label": "DALL-E 3 — генерация картинки"
       }
     },
     {
@@ -175,16 +136,10 @@
         "json": "{{9.data}}"
       },
       "metadata": {
-        "designer": {
-          "x": 1200,
-          "y": 0
-        },
+        "designer": { "x": 1200, "y": 0 },
         "restore": {},
         "expect": [
-          {
-            "name": "predictions",
-            "type": "array"
-          }
+          { "name": "data", "type": "array" }
         ],
         "label": "Parse Image Response"
       }
@@ -196,10 +151,7 @@
       "parameters": {},
       "mapper": {},
       "metadata": {
-        "designer": {
-          "x": 1450,
-          "y": 0
-        }
+        "designer": { "x": 1450, "y": 0 }
       },
       "routes": [
         {
@@ -208,26 +160,31 @@
               "id": 12,
               "module": "http:ActionSendData",
               "version": 3,
-              "parameters": {},
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              },
               "mapper": {
                 "url": "https://api.telegram.org/bot{{ifempty(variables.TELEGRAM_BOT_TOKEN; \"\")}}/sendPhoto",
-                "method": "POST",
+                "method": "post",
                 "headers": [
-                  {
-                    "name": "Content-Type",
-                    "value": "application/json"
-                  }
+                  { "name": "Content-Type", "value": "application/json" }
                 ],
                 "qs": [],
                 "bodyType": "raw",
                 "contentType": "application/json",
-                "body": "{\"chat_id\": \"{{ifempty(variables.TELEGRAM_CHAT_ID; \"\")}}\", \"photo\": \"data:image/png;base64,{{11.predictions[0].bytesBase64Encoded}}\", \"caption\": \"{{10.title}}\\n\\n{{10.text_short}}\\n\\n{{10.hashtags}}\", \"parse_mode\": \"HTML\"}"
+                "body": "{\"chat_id\": \"{{ifempty(variables.TELEGRAM_CHAT_ID; \"\")}}\", \"photo\": \"{{11.data[].url}}\", \"caption\": \"{{10.title}}\\n\\n{{10.text_short}}\\n\\n{{10.hashtags}}\", \"parse_mode\": \"HTML\"}",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
               },
               "metadata": {
-                "designer": {
-                  "x": 1750,
-                  "y": -300
-                },
+                "designer": { "x": 1750, "y": -300 },
                 "restore": {},
                 "expect": [],
                 "label": "Telegram — отправка с картинкой"
@@ -242,41 +199,34 @@
               "id": 6,
               "module": "http:ActionSendData",
               "version": 3,
-              "parameters": {},
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              },
               "mapper": {
                 "url": "https://api.vk.com/method/wall.post",
-                "method": "POST",
+                "method": "post",
                 "headers": [],
                 "qs": [
-                  {
-                    "name": "access_token",
-                    "value": "{{ifempty(variables.VK_ACCESS_TOKEN; \"\")}}"
-                  },
-                  {
-                    "name": "owner_id",
-                    "value": "-{{ifempty(variables.VK_GROUP_ID; \"\")}}"
-                  },
-                  {
-                    "name": "from_group",
-                    "value": "1"
-                  },
-                  {
-                    "name": "message",
-                    "value": "{{10.title}}\n\n{{10.text_short}}\n\n{{10.hashtags}}"
-                  },
-                  {
-                    "name": "v",
-                    "value": "5.199"
-                  }
+                  { "name": "access_token", "value": "{{ifempty(variables.VK_ACCESS_TOKEN; \"\")}}" },
+                  { "name": "owner_id", "value": "-{{ifempty(variables.VK_GROUP_ID; \"\")}}" },
+                  { "name": "from_group", "value": "1" },
+                  { "name": "message", "value": "{{10.title}}\n\n{{10.text_short}}\n\n{{10.hashtags}}" },
+                  { "name": "attachments", "value": "{{11.data[].url}}" },
+                  { "name": "v", "value": "5.199" }
                 ],
-                "bodyType": "raw",
-                "contentType": "application/x-www-form-urlencoded"
+                "bodyType": "",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
               },
               "metadata": {
-                "designer": {
-                  "x": 1750,
-                  "y": -100
-                },
+                "designer": { "x": 1750, "y": -100 },
                 "restore": {},
                 "expect": [],
                 "label": "VK — публикация поста"
@@ -291,30 +241,32 @@
               "id": 7,
               "module": "http:ActionSendData",
               "version": 3,
-              "parameters": {},
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              },
               "mapper": {
                 "url": "https://api.vc.ru/v2.8/entry/create",
-                "method": "POST",
+                "method": "post",
                 "headers": [
-                  {
-                    "name": "X-Device-Token",
-                    "value": "{{ifempty(variables.VC_API_TOKEN; \"\")}}"
-                  },
-                  {
-                    "name": "Content-Type",
-                    "value": "application/json"
-                  }
+                  { "name": "X-Device-Token", "value": "{{ifempty(variables.VC_API_TOKEN; \"\")}}" },
+                  { "name": "Content-Type", "value": "application/json" }
                 ],
                 "qs": [],
                 "bodyType": "raw",
                 "contentType": "application/json",
-                "body": "{\"title\": \"{{10.title}}\", \"entry\": {\"blocks\": [{\"type\": \"text\", \"data\": {\"text\": \"{{replace(10.text_long; newline; \"\\\\n\")}}\\n\\n{{10.hashtags}}\"}}]}, \"subsite_id\": {{ifempty(variables.VC_SUBSITE_ID; 0)}}}"
+                "body": "{\"title\": \"{{10.title}}\", \"entry\": {\"blocks\": [{\"type\": \"text\", \"data\": {\"text\": \"{{10.text_long}}\\n\\n{{10.hashtags}}\"}}]}, \"subsite_id\": {{ifempty(variables.VC_SUBSITE_ID; 0)}}}",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
               },
               "metadata": {
-                "designer": {
-                  "x": 1750,
-                  "y": 100
-                },
+                "designer": { "x": 1750, "y": 100 },
                 "restore": {},
                 "expect": [],
                 "label": "VC.ru — публикация статьи"
@@ -329,30 +281,32 @@
               "id": 8,
               "module": "http:ActionSendData",
               "version": 3,
-              "parameters": {},
+              "parameters": {
+                "handleErrors": true,
+                "useNewZLibDeCompress": true
+              },
               "mapper": {
                 "url": "https://api.dzen.ru/v1/publication",
-                "method": "POST",
+                "method": "post",
                 "headers": [
-                  {
-                    "name": "Authorization",
-                    "value": "Bearer {{ifempty(variables.DZEN_API_TOKEN; \"\")}}"
-                  },
-                  {
-                    "name": "Content-Type",
-                    "value": "application/json"
-                  }
+                  { "name": "Authorization", "value": "Bearer {{ifempty(variables.DZEN_API_TOKEN; \"\")}}" },
+                  { "name": "Content-Type", "value": "application/json" }
                 ],
                 "qs": [],
                 "bodyType": "raw",
                 "contentType": "application/json",
-                "body": "{\"title\": \"{{10.title}}\", \"content\": \"{{replace(10.text_long; newline; \"\\\\n\")}}\\n\\n{{10.hashtags}}\", \"type\": \"article\"}"
+                "body": "{\"title\": \"{{10.title}}\", \"content\": \"{{10.text_long}}\\n\\n{{10.hashtags}}\", \"type\": \"article\"}",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
               },
               "metadata": {
-                "designer": {
-                  "x": 1750,
-                  "y": 300
-                },
+                "designer": { "x": 1750, "y": 300 },
                 "restore": {},
                 "expect": [],
                 "label": "Яндекс Дзен — публикация"
@@ -380,6 +334,6 @@
       "orphans": []
     },
     "zone": "eu2.make.com",
-    "notes": "Автопостинг контента через AI.\n\nМодели:\n- Текст: Claude Sonnet 4.6 (Anthropic API)\n- Картинки: Imagen 3.0 / Nano Banana 2 (Google AI API)\n\nНеобходимые переменные сценария:\n- ANTHROPIC_API_KEY: ключ API Anthropic для Claude\n- GOOGLE_AI_API_KEY: ключ Google AI для Imagen\n- TELEGRAM_BOT_TOKEN: токен бота от @BotFather\n- TELEGRAM_CHAT_ID: ID канала/чата Telegram\n- VK_ACCESS_TOKEN: токен доступа VK API\n- VK_GROUP_ID: ID группы ВКонтакте\n- VC_API_TOKEN: токен API vc.ru\n- VC_SUBSITE_ID: ID подсайта на vc.ru\n- DZEN_API_TOKEN: токен API Яндекс Дзен"
+    "notes": "Автопостинг контента через AI.\n\nМодели:\n- Текст: Claude Sonnet (Anthropic API)\n- Картинки: DALL-E 3 (OpenAI API) — возвращает URL картинки\n\nНеобходимые переменные сценария:\n- ANTHROPIC_API_KEY: ключ Anthropic API\n- OPENAI_API_KEY: ключ OpenAI API (для DALL-E 3)\n- TELEGRAM_BOT_TOKEN: токен бота @BotFather\n- TELEGRAM_CHAT_ID: ID канала/чата\n- VK_ACCESS_TOKEN: токен VK API (опционально)\n- VK_GROUP_ID: ID группы ВК (опционально)\n- VC_API_TOKEN: токен vc.ru (опционально)\n- VC_SUBSITE_ID: ID подсайта vc.ru (опционально)\n- DZEN_API_TOKEN: токен Дзен (опционально)"
   }
 }

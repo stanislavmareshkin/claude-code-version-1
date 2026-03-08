@@ -14,8 +14,8 @@
 
 | Задача | Модель | API |
 |---|---|---|
-| Генерация текста | **Claude Sonnet 4.6** | Anthropic API (`claude-sonnet-4-6`) |
-| Генерация картинок | **Imagen 3.0 (Nano Banana 2)** | Google Generative Language API |
+| Генерация текста | **Claude Sonnet** | Anthropic API (`claude-sonnet-4-5-20241022`) |
+| Генерация картинок | **DALL-E 3** | OpenAI API (возвращает URL картинки) |
 
 ## Шаг 1: Импорт blueprint
 
@@ -30,7 +30,7 @@
 | Переменная | Описание | Где получить |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Ключ Anthropic API (Claude) | https://console.anthropic.com/settings/keys |
-| `GOOGLE_AI_API_KEY` | Ключ Google AI (Imagen) | https://aistudio.google.com/apikey |
+| `OPENAI_API_KEY` | Ключ OpenAI (DALL-E 3) | https://platform.openai.com/api-keys |
 | `TELEGRAM_BOT_TOKEN` | Токен Telegram бота | @BotFather в Telegram |
 | `TELEGRAM_CHAT_ID` | ID канала/чата | Бот @userinfobot или @getmyid_bot |
 | `VK_ACCESS_TOKEN` | Токен VK API | https://dev.vk.com → Мои приложения |
@@ -65,7 +65,7 @@
 
 ## Примечания
 
-- Claude Sonnet 4.6 генерирует `image_prompt` на английском — это промпт для Imagen
+- Claude генерирует `image_prompt` на английском — это промпт для DALL-E 3, который возвращает URL картинки
 - VK: для постинга с картинкой потребуется дополнительный модуль загрузки фото через `photos.getWallUploadServer`
 - VC.ru и Дзен используют HTTP-модули, нативных модулей Make для них нет
 - API-ключи хранятся в переменных сценария Make.com для безопасности
