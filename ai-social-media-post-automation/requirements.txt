@@ -1,0 +1,19 @@
+# Core dependencies
+openai>=1.0.0
+pillow>=10.0.0
+requests>=2.31.0
+schedule>=1.2.0
+
+# Optional: For advanced image generation
+# diffusers>=0.21.0
+# torch>=2.0.0
+
+# Optional: For database storage (instead of JSON)
+# sqlalchemy>=2.0.0
+# psycopg2-binary>=2.9.0
+
+# Optional: For web dashboard
+# flask>=3.0.0
+# flask-cors>=4.0.0
+
+
