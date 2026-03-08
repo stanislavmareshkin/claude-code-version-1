@@ -13,33 +13,48 @@ import os
 import urllib.request
 import urllib.error
 
+# Загрузка .env файла
+def load_dotenv(path=None):
+    if path is None:
+        path = os.path.join(os.path.dirname(__file__), ".env")
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            value = value.strip().strip('"').strip("'")
+            os.environ.setdefault(key.strip(), value)
+
+load_dotenv()
+
 # ============================================================
 # КОНФИГУРАЦИЯ — заполните свои значения
 # ============================================================
 
-MAKE_API_TOKEN = "6bdc25a8-0233-4335-86d0-ea3b7b9e2531"
+MAKE_API_TOKEN = os.getenv("MAKE_API_TOKEN", "")
+MAKE_ZONE = os.getenv("MAKE_ZONE", "eu2")
 
-# Регион Make.com (eu1, eu2, us1, us2) — проверьте в URL вашего Make.com
-MAKE_ZONE = "eu2"
-
-# API-ключи для AI-моделей
-ANTHROPIC_API_KEY = "ВАШ_КЛЮЧ_ANTHROPIC"  # <-- вставьте ключ Claude
-GOOGLE_AI_API_KEY = "ВАШ_КЛЮЧ_GOOGLE_AI"  # <-- вставьте ключ Google AI
+# API-ключи загружаются из .env файла (см. .env.example)
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
 
 # Telegram (обязательно)
-TELEGRAM_BOT_TOKEN = ""  # <-- токен от @BotFather
-TELEGRAM_CHAT_ID = ""    # <-- ID канала/чата
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # VK (опционально)
-VK_ACCESS_TOKEN = ""     # <-- токен VK API
-VK_GROUP_ID = ""         # <-- ID группы
+VK_ACCESS_TOKEN = os.getenv("VK_ACCESS_TOKEN", "")
+VK_GROUP_ID = os.getenv("VK_GROUP_ID", "")
 
 # VC.ru (опционально)
-VC_API_TOKEN = ""
-VC_SUBSITE_ID = ""
+VC_API_TOKEN = os.getenv("VC_API_TOKEN", "")
+VC_SUBSITE_ID = os.getenv("VC_SUBSITE_ID", "")
 
 # Яндекс Дзен (опционально)
-DZEN_API_TOKEN = ""
+DZEN_API_TOKEN = os.getenv("DZEN_API_TOKEN", "")
 
 # ============================================================
 
