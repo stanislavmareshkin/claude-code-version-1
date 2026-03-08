@@ -1,0 +1,316 @@
+{
+  "name": "Автопост Дзен через WordPress RSS CLEAN",
+  "flow": [
+    {
+      "id": 33,
+      "module": "google-sheets:getCell",
+      "version": 2,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "cell": "A1",
+        "from": "drive",
+        "select": "list",
+        "sheetId": "Sheet1",
+        "spreadsheetId": "/YOUR_SPREADSHEET_ID",
+        "valueRenderOption": "FORMATTED_VALUE",
+        "dateTimeRenderOption": "FORMATTED_STRING"
+      },
+      "metadata": { "designer": { "x": 44, "y": 173, "name": "ТЕМА" } }
+    },
+    {
+      "id": 34,
+      "module": "google-sheets:getCell",
+      "version": 2,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "cell": "B1",
+        "from": "drive",
+        "select": "list",
+        "sheetId": "Sheet1",
+        "spreadsheetId": "/YOUR_SPREADSHEET_ID",
+        "valueRenderOption": "FORMATTED_VALUE",
+        "dateTimeRenderOption": "FORMATTED_STRING"
+      },
+      "metadata": { "designer": { "x": 336, "y": 165, "name": "КЛЮЧИ" } }
+    },
+    {
+      "id": 49,
+      "module": "perplexity-ai:createAChatCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "llama-3.1-sonar-large-128k-online",
+        "messages": [
+          { "role": "system", "content": "Ты редактор контент-платформы. Напиши подробную полезную статью на русском языке объемом 8000-12000 знаков. Используй HTML-разметку: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <li>, <b>, <a href=\"URL\">. Текст должен быть фактическим, структурированным, без воды и без упоминания конкретных авторов или каналов." },
+          { "role": "user", "content": "Тема: {{33.value}}. Ключевые слова: {{34.value}}. Подготовь готовую HTML-статью для публикации на сайте и дальнейшей отдачи в RSS/Дзен." }
+        ],
+        "max_tokens": "10000"
+      },
+      "metadata": { "designer": { "x": 600, "y": 150, "name": "СТАТЬЯ" } }
+    },
+    {
+      "id": 48,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты литературный редактор. Перепиши текст так, чтобы он звучал естественно, ясно и по-человечески, сохраняя факты, смысл и HTML-разметку. Не добавляй личный бренд, ссылки на каналы, агрессивный тон или подражание конкретным авторам." },
+          { "role": "user", "content": "Отредактируй и улучши этот HTML-текст, сохранив разметку и структуру: {{49.choices[].message.content}}" }
+        ],
+        "max_tokens": "10000",
+        "temperature": "1.0",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 900, "y": 150, "name": "Редактор статьи" } }
+    },
+    {
+      "id": 37,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты промпт инженер - твоя задача написать 20 развёрнутых, профессиональных промптов для нейросети которая указанна в теме. Тема статьи: [\"{{33.value}}\"]  Также обьясняй каждый промпто по русски." },
+          { "role": "user", "content": "Напиши профессиональные раскрытые  промпты на русском языке (развёрнуто).Которые можно использовать в нейросети которая указанна в теме : {{33.value}} .  Отвечай только промптами" }
+        ],
+        "max_tokens": "0",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 1200, "y": 150 } }
+    },
+    {
+      "id": 44,
+      "module": "markdown:Compile",
+      "version": 2,
+      "parameters": {},
+      "mapper": { "gfm": true, "data": "{{48.result}}", "sanitize": false },
+      "metadata": { "designer": { "x": 1500, "y": 150 } }
+    },
+    {
+      "id": 46,
+      "module": "markdown:Compile",
+      "version": 2,
+      "parameters": {},
+      "mapper": { "gfm": true, "data": "{{37.result}}", "sanitize": false },
+      "metadata": { "designer": { "x": 1800, "y": 150 } }
+    },
+    {
+      "id": 36,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты создаёшь SEO оптимизированный  description по заголовку и описанию статьи. Ты должен отдавать только описание без скобочек" },
+          { "role": "user", "content": "Тема статьи: {{33.value}}\nКлючевые слова: {{34.value}}" }
+        ],
+        "max_tokens": "400",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 2100, "y": 150, "name": "Дискрипшен" } }
+    },
+    {
+      "id": 21,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "I apologize for the confusion. Here's an optimized version of your prompt in English:You are a prompt engineer tasked with creating a comic-style cover image for an article based on Russian folklore. Invent a story featuring a Russian bogatyr (hero) in an interesting situation, which you need to visualize. The main character is a male bogatyr. This prompt is for the Midjourney AI. If you want to include text in the image, put that text in quotation marks \"\". The rest of the prompt should be without quotation marks.\n\nExample:Russian folk hero, muscular man with beard, traditional medieval Slavic clothing, standing in front of a magical forest, confronting a three-headed dragon, stylized comic book art, vibrant colors, ornate Slavic patterns, postmodern interpretation, neo-folkloric style, dynamic composition, hand-drawn look, \"....\" , woodcut-inspired linework, surreal elements, dreamlike atmosphere\n\nThe prompt should be in English. Your response should consist only of the prompt." },
+          { "role": "user", "content": "{{33.value}} вот название статьи, изучи системный промпт, и создай промпт изображения строго по системным инструкциям !!!" }
+        ],
+        "max_tokens": "400",
+        "temperature": "1.0",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 2400, "y": 150, "name": "ПРОМПТ" } }
+    },
+    {
+      "id": 22,
+      "module": "userapi-ai:ImagineByPrompt",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "prompt": "{{21.result}}, editorial illustration, high detail, --ar 16:10" },
+      "metadata": { "designer": { "x": 2700, "y": 150 } }
+    },
+    {
+      "id": 23,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "duration": "210" },
+      "metadata": { "designer": { "x": 3000, "y": 150 } }
+    },
+    {
+      "id": 24,
+      "module": "userapi-ai:status",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{22.hash}}" },
+      "metadata": { "designer": { "x": 3300, "y": 150 } }
+    },
+    {
+      "id": 25,
+      "module": "math:EvaluateExpression",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "expression": "randomInt(1, 4)" },
+      "metadata": { "designer": { "x": 3600, "y": 150 } }
+    },
+    {
+      "id": 26,
+      "module": "userapi-ai:Upscale",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{24.hash}}", "choice": "{{25.result}}" },
+      "metadata": { "designer": { "x": 3900, "y": 150 } }
+    },
+    {
+      "id": 27,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "duration": "40" },
+      "metadata": { "designer": { "x": 4200, "y": 150 } }
+    },
+    {
+      "id": 28,
+      "module": "userapi-ai:status",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{26.hash}}" },
+      "metadata": { "designer": { "x": 4500, "y": 150 } }
+    },
+    {
+      "id": 29,
+      "module": "http:ActionGetFile",
+      "version": 3,
+      "parameters": { "handleErrors": false },
+      "mapper": { "url": "{{28.result.url}}", "method": "get", "serializeUrl": false, "shareCookies": false },
+      "metadata": { "designer": { "x": 4800, "y": 150 } }
+    },
+    {
+      "id": 47,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты создаёшь название файла изображения по заголовку" },
+          { "role": "system", "content": "вот заголовок ,отвечай только названием файла без \"\" нв русском языке не добавляй .jpg :\n{{33.value}}" }
+        ],
+        "max_tokens": "200",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 5100, "y": 150, "name": "Название файла" } }
+    },
+    {
+      "id": 30,
+      "module": "util:SetVariable2",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "name": "uniqueFileName", "scope": "execution", "value": "{{47.result}}" },
+      "metadata": { "designer": { "x": 5400, "y": 150 } }
+    },
+    {
+      "id": 42,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": { "designer": { "x": 5700, "y": 150 } },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 31,
+              "module": "wordpress:createMediaItem",
+              "version": 3,
+              "parameters": { "__IMTCONN__": null },
+              "mapper": {
+                "data": "{{29.data}}",
+                "title": "{{30.uniqueFileName}}",
+                "altText": "{{47.result}}",
+                "caption": "{{47.result}}",
+                "fileName": "{{30.uniqueFileName}}.png",
+                "description": "{{47.result}}"
+              },
+              "metadata": { "designer": { "x": 6000, "y": 0 } }
+            },
+            {
+              "id": 32,
+              "module": "wordpress:createPost",
+              "version": 3,
+              "parameters": { "__IMTCONN__": null },
+              "mapper": {
+                "type": "posts",
+                "title": "{{33.value}}",
+                "author": 1,
+                "status": "publish",
+                "content": "{{44.data}}{{46.data}}",
+                "excerpt": "{{36.result}}",
+                "categories": [1],
+                "pingStatus": "open",
+                "featuredMedia": "{{31.ID}}"
+              },
+              "metadata": { "designer": { "x": 6300, "y": 0 } }
+            },
+            {
+              "id": 35,
+              "module": "google-sheets:deleteRow",
+              "version": 2,
+              "parameters": { "__IMTCONN__": null },
+              "mapper": {
+                "from": "drive",
+                "select": "list",
+                "sheetId": 0,
+                "rowNumber": "1",
+                "spreadsheetId": "/YOUR_SPREADSHEET_ID"
+              },
+              "metadata": { "designer": { "x": 6600, "y": 0 } }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": { "orphans": [] },
+    "zone": "eu2.make.com"
+  }
+}

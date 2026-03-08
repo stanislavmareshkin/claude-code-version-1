@@ -1,0 +1,348 @@
+{
+  "name": "Автопост VC webhook CLEAN",
+  "flow": [
+    {
+      "id": 75,
+      "module": "google-sheets:getCell",
+      "version": 2,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "cell": "A1",
+        "from": "drive",
+        "select": "list",
+        "sheetId": "Sheet1",
+        "spreadsheetId": "/YOUR_SPREADSHEET_ID",
+        "valueRenderOption": "FORMATTED_VALUE",
+        "dateTimeRenderOption": "FORMATTED_STRING"
+      },
+      "metadata": { "designer": { "x": 0, "y": 300, "name": "ТЕМА" } }
+    },
+    {
+      "id": 76,
+      "module": "google-sheets:getCell",
+      "version": 2,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "cell": "B1",
+        "from": "drive",
+        "select": "list",
+        "sheetId": "Sheet1",
+        "spreadsheetId": "/YOUR_SPREADSHEET_ID",
+        "valueRenderOption": "FORMATTED_VALUE",
+        "dateTimeRenderOption": "FORMATTED_STRING"
+      },
+      "metadata": { "designer": { "x": 300, "y": 300, "name": "КЛЮЧИ" } }
+    },
+    {
+      "id": 77,
+      "module": "perplexity-ai:createAChatCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "llama-3.1-sonar-large-128k-online",
+        "messages": [
+          { "role": "system", "content": "Ты редактор делового медиа. Напиши подробную полезную статью на русском языке объемом 8000-12000 знаков. Используй HTML-разметку: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <li>, <b>, <a href=\"URL\">. Тон ясный, профессиональный и содержательный. Без упоминания конкретных авторов, каналов и без художественной стилизации под персоналии." },
+          { "role": "user", "content": "Тема: {{75.value}}. Ключевые слова: {{76.value}}. Подготовь готовую HTML-статью для VC или корпоративного блога: четкая структура, факты, примеры и выводы." }
+        ],
+        "max_tokens": "10000"
+      },
+      "metadata": { "designer": { "x": 600, "y": 300, "name": "СТАТЬЯ" } }
+    },
+    {
+      "id": 78,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты редактор делового медиа. Перепиши текст так, чтобы он звучал живо, профессионально и убедительно. Сохрани HTML-разметку, убери вычурность, личный бренд и художественное подражание конкретным авторам." },
+          { "role": "user", "content": "Отредактируй материал под деловой стиль и сохрани HTML-разметку: {{77.choices[].message.content}}" }
+        ],
+        "max_tokens": "10000",
+        "temperature": "1.0",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 900, "y": 300, "name": "Редактор статьи" } }
+    },
+    {
+      "id": 79,
+      "module": "markdown:Compile",
+      "version": 2,
+      "parameters": {},
+      "mapper": { "gfm": true, "data": "{{78.result}}", "sanitize": false },
+      "metadata": { "designer": { "x": 1200, "y": 300 } }
+    },
+    {
+      "id": 80,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты создаёшь SEO оптимизированный description по заголовку и описанию статьи. Ты должен отдавать только описание без скобочек В стиле Дмитрия Глуховского. И не пиши их слишком длинными" },
+          { "role": "user", "content": "Тема статьи: {{75.value}}\nКлючевые слова: {{76.value}}" }
+        ],
+        "max_tokens": "200",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 1500, "y": 300, "name": "Дискрипшен" } }
+    },
+    {
+      "id": 65,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты дизайнер . Ты должен создавать изображения по промту который я тебе дам\n\nвот пример промпта : \n\nCute white rabbit in a red superhero cape flying against a blue background, with copy space. This is the winning stock photo from a contest, created in a studio setting. The image shows a full-body side view, with high resolution and very sharp, detailed quality, .clean sharp focus, hyper-realistic, ultra sharp photo, octane render, dramatic light, ,award-winning photo, cinematic lighting, stock photography\n\nПромпт можешь изменять уберать и вносить детали. Промпт должен быть 1  на английском языке, " },
+          { "role": "user", "content": "тема : {{75.value}}\nПерсонаж : придумай (только не робот)\nЦвет фона : однотонный, яркий , цвет придумай\n\nОдежда и предметы: придумай сам .\n\nМинимализм !!!! Макретинговая картинка, или фото\n\nпромпт не длинее 300 знаков на англяйском" }
+        ],
+        "max_tokens": "400",
+        "temperature": "1.0",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 1800, "y": 300, "name": "ПРОМПТ" } }
+    },
+    {
+      "id": 66,
+      "module": "userapi-ai:ImagineByPrompt",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "prompt": "{{65.result}}, editorial illustration, high detail, --ar 16:10" },
+      "metadata": { "designer": { "x": 2100, "y": 300 } }
+    },
+    {
+      "id": 67,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "duration": "200" },
+      "metadata": { "designer": { "x": 2400, "y": 300 } }
+    },
+    {
+      "id": 68,
+      "module": "userapi-ai:status",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{66.hash}}" },
+      "metadata": { "designer": { "x": 2700, "y": 300 } }
+    },
+    {
+      "id": 69,
+      "module": "math:EvaluateExpression",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "expression": "randomInt(1, 4)" },
+      "metadata": { "designer": { "x": 3000, "y": 300 } }
+    },
+    {
+      "id": 70,
+      "module": "userapi-ai:Upscale",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{68.hash}}", "choice": "{{69.result}}" },
+      "metadata": { "designer": { "x": 3300, "y": 300 } }
+    },
+    {
+      "id": 71,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "duration": "60" },
+      "metadata": { "designer": { "x": 3600, "y": 300 } }
+    },
+    {
+      "id": 72,
+      "module": "userapi-ai:status",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{70.hash}}" },
+      "metadata": { "designer": { "x": 3900, "y": 300 } }
+    },
+    {
+      "id": 73,
+      "module": "http:ActionGetFile",
+      "version": 3,
+      "parameters": { "handleErrors": false },
+      "mapper": { "url": "{{72.result.url}}", "method": "get", "serializeUrl": false, "shareCookies": false },
+      "metadata": { "designer": { "x": 4200, "y": 300 } }
+    },
+    {
+      "id": 96,
+      "module": "placid-app:uploadMedia",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "file_data": "{{73.data}}", "file_name": "{{73.fileName}}" },
+      "metadata": { "designer": { "x": 4500, "y": 300 } }
+    },
+    {
+      "id": 74,
+      "module": "placid-app:createImage",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "bg": {},
+        "img": { "p_de3a5b3adb289f8b9d7fa31e7a00c662": "{{96.file}}" },
+        "logo": {},
+        "title": { "p_1da2c44044dc9a36efee0c035f5eb2bc": "#000000", "p_86a933575d0aff8a2ebb38be4ab93f7c": "{{75.value}}" },
+        "template": {},
+        "New text layer": {},
+        "New picture layer": {},
+        "image_modifications": {},
+        "template_integromat": "5bjy4n310nocu",
+        "placid_queue_request": false
+      },
+      "metadata": { "designer": { "x": 4800, "y": 300 } }
+    },
+    {
+      "id": 95,
+      "module": "http:ActionGetFile",
+      "version": 3,
+      "parameters": { "handleErrors": false },
+      "mapper": { "url": "{{74.image}}", "method": "get", "serializeUrl": false, "shareCookies": false },
+      "metadata": { "designer": { "x": 5100, "y": 300 } }
+    },
+    {
+      "id": 81,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты создаёшь название файла изображения по заголовку" },
+          { "role": "system", "content": "вот заголовок ,отвечай только названием файла без \"\" нв русском языке не добавляй .jpg :\n{{75.value}}" }
+        ],
+        "max_tokens": "200",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 5400, "y": 300, "name": "Название файла" } }
+    },
+    {
+      "id": 82,
+      "module": "util:SetVariable2",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "name": "uniqueFileName", "scope": "execution", "value": "{{81.result}}" },
+      "metadata": { "designer": { "x": 5700, "y": 300 } }
+    },
+    {
+      "id": 83,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": { "designer": { "x": 6000, "y": 300 } },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 91,
+              "module": "openai-gpt-3:CreateCompletion",
+              "version": 1,
+              "parameters": { "__IMTCONN__": null },
+              "mapper": {
+                "select": "chat",
+                "max_tokens": "200",
+                "temperature": "1.0",
+                "top_p": "1",
+                "n_completions": "1",
+                "response_format": "text",
+                "model": "gpt-4o-mini",
+                "messages": [
+                  { "role": "system", "content": "Вы - редактор VC.ru. Придумайте понятный, цепкий и деловой заголовок для статьи на русском языке. Максимум 90 символов. Без кликбейта, без кавычек, без точки в конце. Заголовок должен передавать суть материала и пользу для читателя." },
+                  { "role": "user", "content": "Пиши по-русски. Вот тема: {{75.value}}. Вот текст статьи: {{78.result}}. Верни только заголовок." }
+                ]
+              },
+              "metadata": { "designer": { "x": 6300, "y": 600 } }
+            },
+            {
+              "id": 92,
+              "module": "openai-gpt-3:CreateCompletion",
+              "version": 1,
+              "parameters": { "__IMTCONN__": null },
+              "mapper": {
+                "select": "chat",
+                "max_tokens": "300",
+                "temperature": "1.0",
+                "top_p": "1",
+                "n_completions": "1",
+                "response_format": "text",
+                "model": "gpt-4o-mini",
+                "messages": [
+                  { "role": "system", "content": "Вы - редактор VC.ru. Напишите лид для статьи на русском языке: 2-3 коротких абзаца, до 600 символов, без HTML и без эмодзи. Тон деловой, ясный и полезный. Сфокусируйтесь на проблеме, сути новости и практическом выводе." },
+                  { "role": "user", "content": "Пиши по-русски. Вот тема: {{75.value}}. Вот полный текст статьи: {{78.result}}. Верни только лид без заголовка." }
+                ]
+              },
+              "metadata": { "designer": { "x": 6600, "y": 600 } }
+            },
+            {
+              "id": 93,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": { "handleErrors": true, "useNewZLibDeCompress": true },
+              "mapper": {
+                "url": "https://YOUR-VC-PUBLISHER-ENDPOINT",
+                "serializeUrl": false,
+                "method": "post",
+                "headers": [{ "name": "Content-Type", "value": "multipart/form-data" }],
+                "qs": [],
+                "bodyType": "multipart_form_data",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "formDataFields": [
+                  { "fieldType": "text", "key": "platform", "value": "vc" },
+                  { "fieldType": "text", "key": "title", "value": "{{91.result}}" },
+                  { "fieldType": "text", "key": "lead", "value": "{{92.result}}" },
+                  { "fieldType": "text", "key": "excerpt", "value": "{{80.result}}" },
+                  { "fieldType": "text", "key": "content_html", "value": "{{79.data}}" },
+                  { "fieldType": "text", "key": "topic", "value": "{{75.value}}" },
+                  { "fieldType": "file", "key": "cover_image", "data": "{{95.data}}", "fileName": "{{95.fileName}}" }
+                ],
+                "followAllRedirects": false
+              },
+              "metadata": { "designer": { "x": 6900, "y": 600, "name": "VC webhook publish" } }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": { "orphans": [] },
+    "zone": "eu2.make.com"
+  }
+}

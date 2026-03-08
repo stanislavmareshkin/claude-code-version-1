@@ -1,0 +1,354 @@
+{
+  "name": "Автопост VK CLEAN",
+  "flow": [
+    {
+      "id": 29,
+      "module": "inoreader:watchArticles",
+      "version": 1,
+      "parameters": {
+        "type": "folder",
+        "limit": 1,
+        "streamId": "user/YOUR_USER_ID/label/YOUR_FOLDER",
+        "__IMTCONN__": null
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 600 },
+        "restore": {
+          "parameters": {
+            "type": { "label": "Folder" },
+            "streamId": { "label": "YOUR_FOLDER" },
+            "__IMTCONN__": null
+          }
+        },
+        "parameters": [
+          { "name": "__IMTCONN__", "type": "account:inoreader", "label": "Connection", "required": true },
+          { "name": "type", "type": "select", "label": "Type of articles", "required": true, "validate": { "enum": ["feed","tag","folder","user/-/state/com.google/read","user/-/state/com.google/starred","user/-/state/com.google/broadcast","user/-/state/com.google/like","user/-/state/com.google/saved-web-pages"] } },
+          { "name": "limit", "type": "uinteger", "label": "Limit", "required": true },
+          { "name": "streamId", "type": "select", "label": "Folder ID", "required": true }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "regexp:HTMLToText",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "html": "{{29.title}}{{29.summary}}", "newline": "crlf", "uppercaseHeadings": true },
+      "metadata": {
+        "designer": { "x": 300, "y": 600 },
+        "restore": { "expect": { "newline": { "label": "CRLF (\\r\\n) - Windows" } } },
+        "expect": [
+          { "name": "html", "type": "text", "label": "HTML" },
+          { "name": "newline", "type": "select", "label": "Line break", "required": true, "validate": { "enum": ["lf","crlf","cr"] } },
+          { "name": "uppercaseHeadings", "type": "boolean", "label": "Uppercase headings", "required": true }
+        ],
+        "advanced": true
+      }
+    },
+    {
+      "id": 14,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "ВАЖНО : Весь пост с ссылкой и хэштегами Должен быть не больше 500 символов.\nСумаризируй новость, удали все ссылки (кроме той что я предоставил для донатов) и отправь ее в формате для инстаграм на русском языке. Ты дожен быть высокомерным и рассудительным. Также ставь хэштеги под новость 3-4 штуки " },
+          { "role": "user", "content": "{{29.title}}{{3.text}}Вот новость" }
+        ],
+        "max_tokens": "500",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 600, "y": 600 } }
+    },
+    {
+      "id": 5,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "top_p": "1",
+        "select": "chat",
+        "messages": [
+          { "role": "system", "content": "Ты промпт инженер которые пишие крутые промпты для картинок новости, Ты делаешь промпт для midjourney 6.1 . Промпт должен быть на английском языке. На картинке должны происходить события которые указанны в новости (НО ЕСЛИ ТАМ ПОЛИТИКА) - не вставляй имена Фамилии в промпт,которую я тебе дам. Оно должно быть обыгранно действием. Там есть главный герой Мужчина в очках для зрения, брюнет. Делай интересные сцены . Не пиши команды , просто опиши сцену. .Картинка нарисованна в comics style\n" },
+          { "role": "user", "content": "{{29.title}} вот заголовок , изучи системный промпт, и создай сказочный промпт изображения строго по системным инструкциям на американском языке, Основной персонаж МУЖЧИНА  !!! Используй название компании из заголовка в скобках \" \" Сам промт должен быть составлен в виде сказочного сцены из комикса, учитывая заголовок придумай такую сцену" }
+        ],
+        "max_tokens": "250",
+        "temperature": "1",
+        "n_completions": "1",
+        "response_format": "text"
+      },
+      "metadata": { "designer": { "x": 900, "y": 600 } }
+    },
+    {
+      "id": 6,
+      "module": "userapi-ai:ImagineByPrompt",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "prompt": "{{5.result}}, editorial illustration, high detail, --ar 4:5" },
+      "metadata": { "designer": { "x": 1200, "y": 600 } }
+    },
+    {
+      "id": 7,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "duration": "300" },
+      "metadata": { "designer": { "x": 1500, "y": 600 } }
+    },
+    {
+      "id": 8,
+      "module": "userapi-ai:status",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{6.hash}}" },
+      "metadata": { "designer": { "x": 1800, "y": 600 } }
+    },
+    {
+      "id": 9,
+      "module": "math:EvaluateExpression",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "expression": "randomInt(1, 4)" },
+      "metadata": { "designer": { "x": 2100, "y": 600 } }
+    },
+    {
+      "id": 10,
+      "module": "userapi-ai:Upscale",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{8.hash}}", "choice": "{{9.result}}" },
+      "metadata": { "designer": { "x": 2400, "y": 600 } }
+    },
+    {
+      "id": 11,
+      "module": "util:FunctionSleep",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "duration": "60" },
+      "metadata": { "designer": { "x": 2700, "y": 600 } }
+    },
+    {
+      "id": 12,
+      "module": "util:FunctionIncrement",
+      "version": 1,
+      "parameters": { "reset": "execution" },
+      "mapper": {},
+      "metadata": { "designer": { "x": 3000, "y": 600 } }
+    },
+    {
+      "id": 13,
+      "module": "userapi-ai:status",
+      "version": 1,
+      "parameters": { "__IMTCONN__": null },
+      "mapper": { "hash": "{{10.hash}}" },
+      "metadata": { "designer": { "x": 3300, "y": 600 } }
+    },
+    {
+      "id": 16,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": { "designer": { "x": 3600, "y": 600 } },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 55,
+              "module": "openai-gpt-3:CreateCompletion",
+              "version": 1,
+              "parameters": { "__IMTCONN__": null },
+              "mapper": {
+                "model": "gpt-4o-mini",
+                "top_p": "1",
+                "select": "chat",
+                "messages": [
+                  { "role": "system", "content": "Ты SMM-редактор для ВКонтакте. Напиши пост на русском языке до 1200 символов. Кратко передай суть новости, используй живой и понятный тон, без грубости, без упоминания сторонних каналов и без лишних ссылок. В конце добавь 3-5 релевантных хэштегов." },
+                  { "role": "user", "content": "Пиши по-русски. Вот новость: {{29.title}} {{3.text}}" }
+                ],
+                "max_tokens": "200",
+                "temperature": "1.0",
+                "n_completions": "1",
+                "response_format": "text"
+              },
+              "metadata": { "designer": { "x": 3900, "y": 1200 } }
+            },
+            {
+              "id": 46,
+              "module": "http:ActionGetFile",
+              "version": 3,
+              "parameters": { "handleErrors": false },
+              "mapper": { "url": "{{13.result.url}}", "method": "get", "serializeUrl": false, "shareCookies": false },
+              "metadata": { "designer": { "x": 4200, "y": 1200 } }
+            },
+            {
+              "id": 47,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": { "handleErrors": true, "useNewZLibDeCompress": true },
+              "mapper": {
+                "url": "https://api.vk.com/method/photos.getWallUploadServer",
+                "serializeUrl": false,
+                "method": "get",
+                "headers": [],
+                "qs": [
+                  { "name": "group_id", "value": "YOUR_VK_GROUP_ID" },
+                  { "name": "access_token", "value": "YOUR_VK_ACCESS_TOKEN" },
+                  { "name": "v", "value": "5.199" }
+                ],
+                "bodyType": "",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
+              },
+              "metadata": { "designer": { "x": 4500, "y": 1200, "name": "VK Получение URL загрузки Изображения" } }
+            },
+            {
+              "id": 48,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": { "type": "" },
+              "mapper": { "json": "{{47.data}}" },
+              "metadata": { "designer": { "x": 4800, "y": 1200 } }
+            },
+            {
+              "id": 49,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": { "handleErrors": true, "useNewZLibDeCompress": true },
+              "mapper": {
+                "url": "{{48.response.upload_url}}",
+                "serializeUrl": false,
+                "method": "post",
+                "headers": [{ "name": "Content-Type", "value": "multipart/form-data" }],
+                "qs": [
+                  { "name": "group_id", "value": "YOUR_VK_GROUP_ID" },
+                  { "name": "access_token", "value": "YOUR_VK_ACCESS_TOKEN" },
+                  { "name": "v", "value": "5.199" }
+                ],
+                "bodyType": "multipart_form_data",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "formDataFields": [{ "fieldType": "file", "key": "photo", "data": "{{46.data}}", "fileName": "{{46.fileName}}" }],
+                "followAllRedirects": false
+              },
+              "metadata": { "designer": { "x": 5100, "y": 1200, "name": "Загрузка изображения на VK" } }
+            },
+            {
+              "id": 50,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": { "type": "" },
+              "mapper": { "json": "{{49.data}}" },
+              "metadata": { "designer": { "x": 5400, "y": 1200 } }
+            },
+            {
+              "id": 51,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": { "handleErrors": true, "useNewZLibDeCompress": true },
+              "mapper": {
+                "url": "https://api.vk.com/method/photos.saveWallPhoto",
+                "serializeUrl": false,
+                "method": "post",
+                "headers": [],
+                "qs": [
+                  { "name": "group_id", "value": "YOUR_VK_GROUP_ID" },
+                  { "name": "photo", "value": "{{50.photo}}" },
+                  { "name": "server", "value": "{{50.server}}" },
+                  { "name": "hash", "value": "{{50.hash}}" },
+                  { "name": "access_token", "value": "YOUR_VK_ACCESS_TOKEN" },
+                  { "name": "v", "value": "5.199" }
+                ],
+                "bodyType": "",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
+              },
+              "metadata": { "designer": { "x": 5700, "y": 1200, "name": "Сохранение изображения на VK" } }
+            },
+            {
+              "id": 52,
+              "module": "json:ParseJSON",
+              "version": 1,
+              "parameters": { "type": "" },
+              "mapper": { "json": "{{51.data}}" },
+              "metadata": { "designer": { "x": 6000, "y": 1200 } }
+            },
+            {
+              "id": 53,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": { "handleErrors": true, "useNewZLibDeCompress": true },
+              "mapper": {
+                "url": "https://api.vk.com/method/wall.post",
+                "serializeUrl": false,
+                "method": "post",
+                "headers": [{ "name": "Content-Type", "value": "multipart/form-data" }],
+                "qs": [
+                  { "name": "owner_id", "value": "-YOUR_VK_GROUP_ID" },
+                  { "name": "message", "value": "{{55.result}}" },
+                  { "name": "attachments", "value": "photo{{52.response[].owner_id}}_{{52.response[].id}}" },
+                  { "name": "access_token", "value": "YOUR_VK_ACCESS_TOKEN" },
+                  { "name": "v", "value": "5.199" },
+                  { "name": "from_group", "value": "true" }
+                ],
+                "bodyType": "",
+                "parseResponse": false,
+                "shareCookies": false,
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "followAllRedirects": false
+              },
+              "metadata": { "designer": { "x": 6300, "y": 1200, "name": "VK ПУБЛИКАЦИЯ С КАРТИНКОЙ" } },
+              "onerror": [
+                { "id": 54, "module": "builtin:Ignore", "version": 1, "metadata": { "designer": { "x": 6600, "y": 1200 } } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": { "orphans": [] },
+    "zone": "eu2.make.com"
+  }
+}
