@@ -1,38 +1,96 @@
 ---
 name: verification-loop
-description: Verification loop — systematic checking of changes before committing
+description: A comprehensive verification system for Claude Code sessions.
 origin: ECC
 ---
 
-# Verification Loop
+# Verification Loop Skill
 
-## When to Activate
+A comprehensive verification system for Claude Code sessions.
 
-- After completing a feature or fix
-- Before committing changes
+## When to Use
+
+- After completing a feature or significant code change
 - Before creating a PR
+- When you want to ensure quality gates pass
 - After refactoring
 
-## Loop Steps
+## Verification Phases
 
-1. **Build** — Ensure the project builds without errors
-2. **Type Check** — Run type checker (mypy, tsc)
-3. **Lint** — Run linter (ruff, eslint)
-4. **Test** — Run full test suite
-5. **Coverage** — Check coverage meets threshold (80%+)
-6. **Review** — Scan diff for debug statements, secrets, issues
-7. **Clean** — Remove temporary files, console.logs, print statements
+### Phase 1: Build Verification
+```bash
+npm run build 2>&1 | tail -20
+# OR for Python:
+python -m py_compile main.py
+```
+If build fails, STOP and fix before continuing.
 
-## Pass Criteria
+### Phase 2: Type Check
+```bash
+# TypeScript
+npx tsc --noEmit 2>&1 | head -30
 
-- All steps must pass
-- No regressions in existing tests
-- No new linting errors
-- No debug statements in production code
-- No secrets in committed code
+# Python
+mypy . 2>&1 | head -30
+```
 
-## On Failure
+### Phase 3: Lint Check
+```bash
+# JavaScript/TypeScript
+npm run lint 2>&1 | head -30
 
-- Fix the issue
-- Re-run the entire loop
-- Do NOT commit with known failures
+# Python
+ruff check . 2>&1 | head -30
+```
+
+### Phase 4: Test Suite
+```bash
+# Run tests with coverage
+pytest --cov=mypackage --cov-report=term-missing
+
+# Target: 80% minimum coverage
+```
+
+### Phase 5: Security Scan
+```bash
+# Check for secrets
+grep -rn "sk-\|api_key\|password" --include="*.py" . 2>/dev/null | head -10
+
+# Check for debug statements
+grep -rn "print(\|console.log" --include="*.py" --include="*.ts" src/ 2>/dev/null | head -10
+```
+
+### Phase 6: Diff Review
+```bash
+git diff --stat
+git diff HEAD~1 --name-only
+```
+
+Review each changed file for unintended changes, missing error handling, edge cases.
+
+## Output Format
+
+```
+VERIFICATION REPORT
+==================
+
+Build:     [PASS/FAIL]
+Types:     [PASS/FAIL] (X errors)
+Lint:      [PASS/FAIL] (X warnings)
+Tests:     [PASS/FAIL] (X/Y passed, Z% coverage)
+Security:  [PASS/FAIL] (X issues)
+Diff:      [X files changed]
+
+Overall:   [READY/NOT READY] for PR
+
+Issues to Fix:
+1. ...
+2. ...
+```
+
+## Continuous Mode
+
+Run verification every 15 minutes or after major changes:
+- After completing each function
+- After finishing a component
+- Before moving to next task
