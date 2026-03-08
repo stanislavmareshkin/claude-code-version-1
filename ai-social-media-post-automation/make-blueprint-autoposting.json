@@ -1,0 +1,385 @@
+{
+  "name": "Автопостинг: Telegram + VK + VC.ru + Яндекс Дзен (Claude + Imagen)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "type": "interval",
+        "interval": 180
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {},
+        "expect": []
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "x-api-key",
+            "value": "{{ifempty(variables.ANTHROPIC_API_KEY; \"\")}}"
+          },
+          {
+            "name": "anthropic-version",
+            "value": "2023-06-01"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"model\": \"claude-sonnet-4-6\", \"max_tokens\": 2000, \"temperature\": 0.8, \"system\": \"Ты — SMM-специалист. Генерируй посты для соцсетей на русском языке. Ответ верни строго в JSON формате:\\n{\\n  \\\"title\\\": \\\"заголовок поста\\\",\\n  \\\"text_short\\\": \\\"короткий текст для Telegram и VK (до 500 символов)\\\",\\n  \\\"text_long\\\": \\\"длинный текст для VC.ru и Дзен (800-1500 символов)\\\",\\n  \\\"hashtags\\\": \\\"#хештег1 #хештег2 #хештег3\\\",\\n  \\\"image_prompt\\\": \\\"описание картинки на английском для генерации через AI (1 предложение)\\\"\\n}\", \"messages\": [{\"role\": \"user\", \"content\": \"Напиши пост на тему бизнеса и технологий. Тема на твой выбор. Формат ответа — только JSON, без markdown.\"}]}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {},
+        "expect": [
+          {
+            "name": "data",
+            "type": "text",
+            "label": "Response body"
+          }
+        ],
+        "parameters": [],
+        "label": "Claude Sonnet 4.6 — генерация текста"
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 550,
+          "y": 0
+        },
+        "restore": {},
+        "expect": [
+          {
+            "name": "content",
+            "type": "array"
+          }
+        ],
+        "label": "Parse Claude Response"
+      }
+    },
+    {
+      "id": 10,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.content[0].text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 750,
+          "y": 0
+        },
+        "restore": {},
+        "expect": [
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "text_short",
+            "type": "text"
+          },
+          {
+            "name": "text_long",
+            "type": "text"
+          },
+          {
+            "name": "hashtags",
+            "type": "text"
+          },
+          {
+            "name": "image_prompt",
+            "type": "text"
+          }
+        ],
+        "label": "Parse Post JSON"
+      }
+    },
+    {
+      "id": 9,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "qs": [
+          {
+            "name": "key",
+            "value": "{{ifempty(variables.GOOGLE_AI_API_KEY; \"\")}}"
+          }
+        ],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"instances\": [{\"prompt\": \"{{10.image_prompt}}\"}], \"parameters\": {\"sampleCount\": 1, \"aspectRatio\": \"16:9\", \"language\": \"en\"}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1000,
+          "y": 0
+        },
+        "restore": {},
+        "expect": [
+          {
+            "name": "data",
+            "type": "text",
+            "label": "Response body (base64 image)"
+          }
+        ],
+        "parameters": [],
+        "label": "Imagen (Nano Banana 2) — генерация картинки"
+      }
+    },
+    {
+      "id": 11,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{9.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        },
+        "restore": {},
+        "expect": [
+          {
+            "name": "predictions",
+            "type": "array"
+          }
+        ],
+        "label": "Parse Image Response"
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 1450,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 12,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": {},
+              "mapper": {
+                "url": "https://api.telegram.org/bot{{ifempty(variables.TELEGRAM_BOT_TOKEN; \"\")}}/sendPhoto",
+                "method": "POST",
+                "headers": [
+                  {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "qs": [],
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "body": "{\"chat_id\": \"{{ifempty(variables.TELEGRAM_CHAT_ID; \"\")}}\", \"photo\": \"data:image/png;base64,{{11.predictions[0].bytesBase64Encoded}}\", \"caption\": \"{{10.title}}\\n\\n{{10.text_short}}\\n\\n{{10.hashtags}}\", \"parse_mode\": \"HTML\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1750,
+                  "y": -300
+                },
+                "restore": {},
+                "expect": [],
+                "label": "Telegram — отправка с картинкой"
+              }
+            }
+          ],
+          "label": "Telegram"
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": {},
+              "mapper": {
+                "url": "https://api.vk.com/method/wall.post",
+                "method": "POST",
+                "headers": [],
+                "qs": [
+                  {
+                    "name": "access_token",
+                    "value": "{{ifempty(variables.VK_ACCESS_TOKEN; \"\")}}"
+                  },
+                  {
+                    "name": "owner_id",
+                    "value": "-{{ifempty(variables.VK_GROUP_ID; \"\")}}"
+                  },
+                  {
+                    "name": "from_group",
+                    "value": "1"
+                  },
+                  {
+                    "name": "message",
+                    "value": "{{10.title}}\n\n{{10.text_short}}\n\n{{10.hashtags}}"
+                  },
+                  {
+                    "name": "v",
+                    "value": "5.199"
+                  }
+                ],
+                "bodyType": "raw",
+                "contentType": "application/x-www-form-urlencoded"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1750,
+                  "y": -100
+                },
+                "restore": {},
+                "expect": [],
+                "label": "VK — публикация поста"
+              }
+            }
+          ],
+          "label": "VK"
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": {},
+              "mapper": {
+                "url": "https://api.vc.ru/v2.8/entry/create",
+                "method": "POST",
+                "headers": [
+                  {
+                    "name": "X-Device-Token",
+                    "value": "{{ifempty(variables.VC_API_TOKEN; \"\")}}"
+                  },
+                  {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "qs": [],
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "body": "{\"title\": \"{{10.title}}\", \"entry\": {\"blocks\": [{\"type\": \"text\", \"data\": {\"text\": \"{{replace(10.text_long; newline; \"\\\\n\")}}\\n\\n{{10.hashtags}}\"}}]}, \"subsite_id\": {{ifempty(variables.VC_SUBSITE_ID; 0)}}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1750,
+                  "y": 100
+                },
+                "restore": {},
+                "expect": [],
+                "label": "VC.ru — публикация статьи"
+              }
+            }
+          ],
+          "label": "VC.ru"
+        },
+        {
+          "flow": [
+            {
+              "id": 8,
+              "module": "http:ActionSendData",
+              "version": 3,
+              "parameters": {},
+              "mapper": {
+                "url": "https://api.dzen.ru/v1/publication",
+                "method": "POST",
+                "headers": [
+                  {
+                    "name": "Authorization",
+                    "value": "Bearer {{ifempty(variables.DZEN_API_TOKEN; \"\")}}"
+                  },
+                  {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "qs": [],
+                "bodyType": "raw",
+                "contentType": "application/json",
+                "body": "{\"title\": \"{{10.title}}\", \"content\": \"{{replace(10.text_long; newline; \"\\\\n\")}}\\n\\n{{10.hashtags}}\", \"type\": \"article\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1750,
+                  "y": 300
+                },
+                "restore": {},
+                "expect": [],
+                "label": "Яндекс Дзен — публикация"
+              }
+            }
+          ],
+          "label": "Яндекс Дзен"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu2.make.com",
+    "notes": "Автопостинг контента через AI.\n\nМодели:\n- Текст: Claude Sonnet 4.6 (Anthropic API)\n- Картинки: Imagen 3.0 / Nano Banana 2 (Google AI API)\n\nНеобходимые переменные сценария:\n- ANTHROPIC_API_KEY: ключ API Anthropic для Claude\n- GOOGLE_AI_API_KEY: ключ Google AI для Imagen\n- TELEGRAM_BOT_TOKEN: токен бота от @BotFather\n- TELEGRAM_CHAT_ID: ID канала/чата Telegram\n- VK_ACCESS_TOKEN: токен доступа VK API\n- VK_GROUP_ID: ID группы ВКонтакте\n- VC_API_TOKEN: токен API vc.ru\n- VC_SUBSITE_ID: ID подсайта на vc.ru\n- DZEN_API_TOKEN: токен API Яндекс Дзен"
+  }
+}
