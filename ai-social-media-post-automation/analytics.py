@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import json
 from collections import defaultdict
-from config import ANALYTICS
+from .config import ANALYTICS
 
 
 class AnalyticsTracker:

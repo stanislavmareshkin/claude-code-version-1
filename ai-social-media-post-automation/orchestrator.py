@@ -9,11 +9,13 @@ from .config import (
     SUPPORTED_PLATFORMS,
     CONTENT_GENERATION,
     PLATFORM_CONFIGS,
+    DATA_DIR,
 )
 from .ai_content_generator import AIContentGenerator
 from .scheduler import ContentScheduler
 from .analytics import AnalyticsTracker
-from .platform_adapters import PlatformAdapter, TelegramAdapter, VKAdapter
+from .platform_adapters import PlatformAdapter, TelegramAdapter, VKAdapter, EmailAdapter
+from .leads import OutreachManager, LeadStorage
 
 
 class SocialMediaOrchestrator:
@@ -29,8 +31,6 @@ class SocialMediaOrchestrator:
             credentials: Dictionary mapping platform names to their credentials
             data_dir: Directory for data storage
         """
-        from config import DATA_DIR
-        
         self.data_dir = Path(data_dir) if data_dir else DATA_DIR
         self.data_dir.mkdir(parents=True, exist_ok=True)
         
@@ -51,7 +51,7 @@ class SocialMediaOrchestrator:
         adapter_classes = {
             "telegram": TelegramAdapter,
             "vk": VKAdapter,
-            # Add more adapters as they're implemented
+            "email": EmailAdapter,
         }
         
         for platform, creds in credentials.items():
@@ -330,4 +330,38 @@ class SocialMediaOrchestrator:
         
         # Run scheduler
         self.scheduler.run_scheduler(interval_seconds=60)
+
+    # ── Lead Outreach ───────────────────────────────────────────────
+
+    def create_outreach_manager(self) -> OutreachManager:
+        """
+        Create an OutreachManager wired to the email adapter for sending.
+
+        Returns:
+            Configured OutreachManager instance
+        """
+        storage = LeadStorage()
+        email_adapter = self.adapters.get("email")
+
+        def send_callback(lead, subject, body):
+            if email_adapter and isinstance(email_adapter, EmailAdapter):
+                result = email_adapter.send_email(
+                    to_email=lead.email,
+                    subject=subject,
+                    body=body,
+                    to_name=lead.contact_name,
+                )
+                return result.get("success", False)
+            # Fallback: Telegram DM if configured
+            tg = self.adapters.get("telegram")
+            if tg and lead.telegram:
+                result = tg.publish_post(f"*{subject}*\n\n{body}")
+                return result.get("success", False)
+            return False
+
+        return OutreachManager(
+            storage=storage,
+            content_generator=self.content_generator,
+            send_callback=send_callback,
+        )
 
