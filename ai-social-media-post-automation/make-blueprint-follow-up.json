@@ -1,0 +1,218 @@
+{
+  "name": "Follow-up: автоматические повторные письма для неответивших лидов",
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-sheets:ActionSearchRows",
+      "version": 4,
+      "parameters": {
+        "mode": "select"
+      },
+      "mapper": {
+        "from": "drive",
+        "sheetId": "{{ifempty(variables.GOOGLE_SPREADSHEET_ID; \"\")}}",
+        "sheetName": "Лиды",
+        "tableFirstRow": "A1:J1",
+        "filter": [
+          {
+            "a": "{{H}}",
+            "b": "proposal_sent",
+            "o": "text:equal"
+          }
+        ],
+        "sortOrder": "asc",
+        "sortBy": "{{I}}",
+        "limit": "{{ifempty(variables.BATCH_SIZE; 10)}}"
+      },
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {},
+        "expect": [
+          { "name": "A", "type": "text", "label": "company" },
+          { "name": "B", "type": "text", "label": "contact_name" },
+          { "name": "C", "type": "text", "label": "email" },
+          { "name": "D", "type": "text", "label": "industry" },
+          { "name": "E", "type": "text", "label": "website" },
+          { "name": "F", "type": "text", "label": "phone" },
+          { "name": "G", "type": "text", "label": "telegram" },
+          { "name": "H", "type": "text", "label": "status" },
+          { "name": "I", "type": "text", "label": "last_sent_date" },
+          { "name": "J", "type": "text", "label": "notes" }
+        ],
+        "label": "Google Sheets — лиды со статусом proposal_sent"
+      }
+    },
+    {
+      "id": 10,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 250, "y": 0 },
+        "restore": {},
+        "label": "Фильтр: прошло >= 3 дня с последней отправки"
+      },
+      "filter": {
+        "name": "Прошло достаточно дней",
+        "conditions": [
+          [
+            {
+              "a": "{{formatDate(addDays(parseDate(1.I; \"YYYY-MM-DD HH:mm\"); 3); \"YYYY-MM-DD\")}}",
+              "b": "{{formatDate(now; \"YYYY-MM-DD\")}}",
+              "o": "date:before"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "method": "post",
+        "headers": [
+          { "name": "x-api-key", "value": "{{ifempty(variables.ANTHROPIC_API_KEY; \"\")}}" },
+          { "name": "anthropic-version", "value": "2023-06-01" },
+          { "name": "Content-Type", "value": "application/json" }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "contentType": "application/json",
+        "body": "{\"model\": \"claude-sonnet-4-5-20241022\", \"max_tokens\": 800, \"temperature\": 0.7, \"system\": \"Ты — эксперт по follow-up письмам в B2B-продажах. Пиши кратко, вежливо, с ценностью для клиента. Не навязывай.\\n\\nНаши услуги: {{ifempty(variables.OUR_SERVICES; \\\"AI-автоматизация маркетинга, чат-боты, автопостинг в соцсетях\\\")}}\\n\\nФормат ответа — строго JSON без markdown-обёрток:\\n{\\n  \\\"subject\\\": \\\"тема follow-up письма (до 78 символов)\\\",\\n  \\\"body_text\\\": \\\"тело письма (50-100 слов максимум)\\\",\\n  \\\"body_html\\\": \\\"тело письма в HTML\\\"\\n}\", \"messages\": [{\"role\": \"user\", \"content\": \"Напиши follow-up письмо.\\nИмя контакта: {{1.B}}\\nКомпания: {{1.A}}\\nОтрасль: {{ifempty(1.D; \\\"бизнес\\\")}}\\nДата первого письма: {{1.I}}\\n\\nОтвечай ТОЛЬКО валидным JSON.\"}]}",
+        "parseResponse": true,
+        "shareCookies": false,
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "followAllRedirects": false
+      },
+      "metadata": {
+        "designer": { "x": 500, "y": 0 },
+        "restore": {},
+        "expect": [],
+        "parameters": [],
+        "label": "Claude — генерация follow-up"
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{2.data}}"
+      },
+      "metadata": {
+        "designer": { "x": 750, "y": 0 },
+        "restore": {},
+        "expect": [
+          { "name": "content", "type": "array" }
+        ],
+        "label": "Parse Claude Response"
+      }
+    },
+    {
+      "id": 4,
+      "module": "json:ParseJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "json": "{{3.content[].text}}"
+      },
+      "metadata": {
+        "designer": { "x": 950, "y": 0 },
+        "restore": {},
+        "expect": [
+          { "name": "subject", "type": "text" },
+          { "name": "body_text", "type": "text" },
+          { "name": "body_html", "type": "text" }
+        ],
+        "label": "Parse Follow-up JSON"
+      }
+    },
+    {
+      "id": 6,
+      "module": "email:ActionSendEmail",
+      "version": 3,
+      "parameters": {
+        "account": "__PLACEHOLDER__"
+      },
+      "mapper": {
+        "to": [
+          { "name": "{{1.B}}", "address": "{{1.C}}" }
+        ],
+        "subject": "{{4.subject}}",
+        "content": "{{4.body_html}}",
+        "contentType": "html",
+        "replyTo": "{{ifempty(variables.EMAIL_REPLY_TO; \"\")}}",
+        "fromName": "{{ifempty(variables.EMAIL_FROM_NAME; \"\")}}"
+      },
+      "metadata": {
+        "designer": { "x": 1200, "y": 0 },
+        "restore": {},
+        "expect": [],
+        "label": "Email — отправка follow-up"
+      },
+      "filter": {
+        "name": "Есть email",
+        "conditions": [
+          [
+            {
+              "a": "{{1.C}}",
+              "b": "",
+              "o": "text:notequal"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "module": "google-sheets:ActionUpdateRow",
+      "version": 4,
+      "parameters": {},
+      "mapper": {
+        "from": "drive",
+        "sheetId": "{{ifempty(variables.GOOGLE_SPREADSHEET_ID; \"\")}}",
+        "sheetName": "Лиды",
+        "rowNumber": "{{1.__ROW_NUMBER__}}",
+        "values": {
+          "I": "{{formatDate(now; \"YYYY-MM-DD HH:mm\")}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 1450, "y": 0 },
+        "restore": {},
+        "expect": [],
+        "label": "Google Sheets — обновляем дату отправки"
+      }
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu2.make.com",
+    "notes": "Follow-up сценарий для холодной рассылки.\n\nПайплайн:\n1. Читаем лиды из Google Sheets (status=proposal_sent)\n2. Фильтруем: прошло >= 3 дня с последней отправки\n3. Claude генерирует короткий follow-up\n4. Отправляем по Email\n5. Обновляем дату в Google Sheets\n\nЗапуск: по расписанию (каждый день в 10:00) или вручную.\n\nНеобходимые переменные сценария:\n- ANTHROPIC_API_KEY\n- GOOGLE_SPREADSHEET_ID\n- EMAIL_FROM_NAME\n- EMAIL_REPLY_TO\n- OUR_SERVICES\n- BATCH_SIZE (по умолчанию 10)\n\nТаблица Google Sheets — та же, что и в сценарии cold-outreach."
+  }
+}
