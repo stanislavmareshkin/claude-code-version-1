@@ -159,6 +159,8 @@ class VKAdapter(PlatformAdapter):
         self, text: str, images: Optional[List[Image.Image]] = None
     ) -> Tuple[bool, Optional[str]]:
         """Validate content for VK."""
+        if not text or not text.strip():
+            return False, "Post text cannot be empty"
         if len(text) > 15895:
             return False, "Text exceeds VK's 15895 character limit"
         if images and len(images) > 10:

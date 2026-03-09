@@ -149,7 +149,10 @@ class LeadStorage:
             json.dump([l.to_dict() for l in self.leads], f, indent=2, ensure_ascii=False)
 
     def _load(self):
-        if self.filepath.exists():
-            with open(self.filepath, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                self.leads = [Lead.from_dict(d) for d in data]
+        if self.filepath.exists() and self.filepath.stat().st_size > 0:
+            try:
+                with open(self.filepath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    self.leads = [Lead.from_dict(d) for d in data]
+            except (json.JSONDecodeError, KeyError):
+                self.leads = []
