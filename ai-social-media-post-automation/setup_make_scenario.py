@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Скрипт автоматической настройки сценария Make.com
-Создаёт сценарий, импортирует blueprint и настраивает переменные.
+Скрипт автоматической настройки ВСЕХ сценариев Make.com
+Создаёт сценарии из всех blueprint-файлов, импортирует их и настраивает переменные.
 
 Запуск:
-  python3 setup_make_scenario.py
+  python3 setup_make_scenario.py          # все blueprint'ы
+  python3 setup_make_scenario.py --only autoposting cold-outreach  # выборочно
 """
 
+import glob
 import json
 import sys
 import os
@@ -58,7 +60,22 @@ VC_SUBSITE_ID = os.getenv("VC_SUBSITE_ID", "")
 # Яндекс Дзен (опционально)
 DZEN_API_TOKEN = os.getenv("DZEN_API_TOKEN", "")
 
+# Email SMTP
+SMTP_HOST = os.getenv("SMTP_HOST", "")
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+
 # ============================================================
+
+# Все blueprint-файлы и их настройки интервалов (в минутах)
+BLUEPRINTS = [
+    {"file": "make-blueprint-autoposting.json",           "interval": 180},
+    {"file": "make-blueprint-vk-clean.json",              "interval": 180},
+    {"file": "make-blueprint-vc-webhook-clean.json",      "interval": 0},    # webhook, без интервала
+    {"file": "make-blueprint-dzen-wordpress-clean.json",   "interval": 360},
+    {"file": "make-blueprint-cold-outreach.json",          "interval": 60},
+    {"file": "make-blueprint-follow-up.json",              "interval": 1440}, # раз в сутки
+]
 
 BASE_URL = f"https://{MAKE_ZONE}.make.com/api/v2"
 HEADERS = {
@@ -107,8 +124,7 @@ def api_request(method, path, data=None):
                 print(f"  Ответ: {error_body}")
                 sys.exit(1)
             else:
-                print(f"  Ошибка {e.code}: {error_body}")
-                sys.exit(1)
+                raise RuntimeError(f"HTTP {e.code}: {error_body}")
         except (urllib.error.URLError, ConnectionError, OSError) as e:
             if attempt < MAX_RETRIES:
                 delay = RETRY_DELAYS[attempt]
@@ -126,7 +142,6 @@ def validate_config():
         print(f"  Получите токен: https://{MAKE_ZONE}.make.com → Profile → API Access")
         sys.exit(1)
 
-    # UUID формат (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) — не является токеном Make.com
     import re
     if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', MAKE_API_TOKEN, re.IGNORECASE):
         print("  ПРЕДУПРЕЖДЕНИЕ: MAKE_API_TOKEN похож на UUID, а не на токен Make.com.")
@@ -135,22 +150,129 @@ def validate_config():
         print()
 
     if not ANTHROPIC_API_KEY:
-        print("  ПРЕДУПРЕЖДЕНИЕ: ANTHROPIC_API_KEY не задан — Claude не будет работать в сценарии.")
+        print("  ПРЕДУПРЕЖДЕНИЕ: ANTHROPIC_API_KEY не задан — Claude не будет работать в сценариях.")
     if not GOOGLE_AI_API_KEY:
         print("  ПРЕДУПРЕЖДЕНИЕ: GOOGLE_AI_API_KEY не задан — генерация изображений не будет работать.")
     if not TELEGRAM_BOT_TOKEN:
         print("  ПРЕДУПРЕЖДЕНИЕ: TELEGRAM_BOT_TOKEN не задан — Telegram-публикация не будет работать.")
 
 
+def get_variables():
+    """Возвращает словарь всех непустых переменных для инъекции в blueprint."""
+    all_vars = {
+        "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
+        "OPENAI_API_KEY": OPENAI_API_KEY,
+        "GOOGLE_AI_API_KEY": GOOGLE_AI_API_KEY,
+        "TELEGRAM_BOT_TOKEN": TELEGRAM_BOT_TOKEN,
+        "TELEGRAM_CHAT_ID": TELEGRAM_CHAT_ID,
+        "VK_ACCESS_TOKEN": VK_ACCESS_TOKEN,
+        "VK_GROUP_ID": VK_GROUP_ID,
+        "VC_API_TOKEN": VC_API_TOKEN,
+        "VC_SUBSITE_ID": VC_SUBSITE_ID,
+        "DZEN_API_TOKEN": DZEN_API_TOKEN,
+        "SMTP_HOST": SMTP_HOST,
+        "SMTP_USER": SMTP_USER,
+        "SMTP_PASSWORD": SMTP_PASSWORD,
+    }
+    return {k: v for k, v in all_vars.items() if v}
+
+
+def deploy_blueprint(team_id, bp_config, active_vars, index, total):
+    """Разворачивает один blueprint как сценарий Make.com."""
+    filename = bp_config["file"]
+    interval = bp_config["interval"]
+    blueprint_path = os.path.join(os.path.dirname(__file__), filename)
+
+    if not os.path.exists(blueprint_path):
+        print(f"  ПРОПУСК: файл {filename} не найден")
+        return None
+
+    with open(blueprint_path, "r", encoding="utf-8") as f:
+        blueprint = json.load(f)
+
+    name = blueprint.get("name", filename)
+    print(f"\n{'─' * 50}")
+    print(f"  [{index}/{total}] {name}")
+    print(f"  Файл: {filename}")
+
+    # Настраиваем scheduling
+    if interval > 0:
+        scheduling = {"type": "interval", "interval": interval}
+    else:
+        scheduling = {"type": "indefinitely"}
+
+    # Создаём сценарий
+    scenario_data = {
+        "teamId": team_id,
+        "name": name,
+        "blueprint": json.dumps(blueprint),
+        "scheduling": scheduling,
+    }
+
+    try:
+        result = api_request("POST", "/scenarios", scenario_data)
+    except RuntimeError as e:
+        print(f"  ОШИБКА при создании: {e}")
+        return None
+
+    scenario = result.get("scenario", result)
+    scenario_id = scenario["id"]
+    print(f"  Создан: ID {scenario_id}")
+
+    # Инъекция переменных в blueprint
+    if active_vars:
+        updated_blueprint = json.loads(json.dumps(blueprint))
+        if "metadata" not in updated_blueprint:
+            updated_blueprint["metadata"] = {}
+        updated_blueprint["metadata"]["variables"] = [
+            {"name": k, "value": v}
+            for k, v in active_vars.items()
+        ]
+        try:
+            api_request("PATCH", f"/scenarios/{scenario_id}", {
+                "blueprint": json.dumps(updated_blueprint)
+            })
+            print(f"  Переменных: {len(active_vars)}")
+        except RuntimeError as e:
+            print(f"  ПРЕДУПРЕЖДЕНИЕ: не удалось обновить переменные: {e}")
+
+    url = f"https://{MAKE_ZONE}.make.com/scenarios/{scenario_id}"
+    print(f"  URL: {url}")
+    return {"id": scenario_id, "name": name, "url": url, "file": filename}
+
+
 def main():
+    # Парсим аргументы --only
+    only_filter = None
+    if "--only" in sys.argv:
+        idx = sys.argv.index("--only")
+        only_filter = sys.argv[idx + 1:]
+        if not only_filter:
+            print("  Использование: python3 setup_make_scenario.py --only autoposting cold-outreach")
+            sys.exit(1)
+
     print("=" * 50)
-    print("  Настройка сценария Make.com")
+    print("  Размещение ВСЕХ сценариев на Make.com")
     print("=" * 50)
 
     validate_config()
 
+    # Фильтруем blueprint'ы если указан --only
+    blueprints = BLUEPRINTS
+    if only_filter:
+        blueprints = [
+            bp for bp in BLUEPRINTS
+            if any(keyword in bp["file"] for keyword in only_filter)
+        ]
+        if not blueprints:
+            print(f"  Не найдено blueprint'ов, подходящих под фильтр: {only_filter}")
+            sys.exit(1)
+        print(f"\n  Фильтр: {only_filter}")
+
+    print(f"  Blueprint'ов к развёртыванию: {len(blueprints)}")
+
     # 1. Получаем организацию и команду
-    print("\n[1/5] Получаю информацию об аккаунте...")
+    print("\n[1/3] Получаю информацию об аккаунте...")
     orgs = api_request("GET", "/organizations")
     if not orgs.get("organizations"):
         print("  Не найдено организаций. Проверьте токен и регион.")
@@ -162,86 +284,37 @@ def main():
     team_id = teams["teams"][0]["id"]
     print(f"  Команда ID: {team_id}")
 
-    # 2. Создаём сценарий
-    print("\n[2/5] Создаю сценарий...")
+    # 2. Разворачиваем все blueprint'ы
+    print(f"\n[2/3] Создаю {len(blueprints)} сценариев...")
 
-    # Загружаем blueprint из файла
-    blueprint_path = os.path.join(os.path.dirname(__file__), "make-blueprint-autoposting.json")
-    with open(blueprint_path, "r", encoding="utf-8") as f:
-        blueprint = json.load(f)
+    active_vars = get_variables()
+    results = []
 
-    scenario_data = {
-        "teamId": team_id,
-        "name": blueprint["name"],
-        "blueprint": json.dumps(blueprint),
-        "scheduling": {
-            "type": "interval",
-            "interval": 180
-        }
-    }
-    result = api_request("POST", "/scenarios", scenario_data)
-    scenario = result.get("scenario", result)
-    scenario_id = scenario["id"]
-    print(f"  Сценарий создан: ID {scenario_id}")
-    print(f"  URL: https://{MAKE_ZONE}.make.com/scenarios/{scenario_id}")
+    for i, bp_config in enumerate(blueprints, 1):
+        result = deploy_blueprint(team_id, bp_config, active_vars, i, len(blueprints))
+        if result:
+            results.append(result)
 
-    # 3. Настраиваем переменные (Data Stores / Keys)
-    print("\n[3/5] Настраиваю переменные сценария...")
+    # 3. Итоговый отчёт
+    print(f"\n{'=' * 50}")
+    print(f"[3/3] ГОТОВО! Создано сценариев: {len(results)}/{len(blueprints)}")
+    print(f"{'=' * 50}")
 
-    variables = {
-        "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
-        "OPENAI_API_KEY": OPENAI_API_KEY,
-        "GOOGLE_AI_API_KEY": GOOGLE_AI_API_KEY,
-        "TELEGRAM_BOT_TOKEN": TELEGRAM_BOT_TOKEN,
-        "TELEGRAM_CHAT_ID": TELEGRAM_CHAT_ID,
-        "VK_ACCESS_TOKEN": VK_ACCESS_TOKEN,
-        "VK_GROUP_ID": VK_GROUP_ID,
-        "VC_API_TOKEN": VC_API_TOKEN,
-        "VC_SUBSITE_ID": VC_SUBSITE_ID,
-        "DZEN_API_TOKEN": DZEN_API_TOKEN,
-    }
+    if results:
+        print("\n  Созданные сценарии:")
+        for r in results:
+            print(f"    ✓ {r['name']}")
+            print(f"      {r['url']}")
 
-    # Фильтруем пустые
-    active_vars = {k: v for k, v in variables.items() if v}
+    failed = len(blueprints) - len(results)
+    if failed:
+        print(f"\n  Не удалось создать: {failed}")
 
-    if active_vars:
-        # Make.com хранит переменные сценария в поле metadata.variables blueprint'а
-        # Формат: массив объектов {name, value} внутри blueprint JSON
-        updated_blueprint = json.loads(json.dumps(blueprint))
-        if "metadata" not in updated_blueprint:
-            updated_blueprint["metadata"] = {}
-        updated_blueprint["metadata"]["variables"] = [
-            {"name": k, "value": v}
-            for k, v in active_vars.items()
-        ]
-
-        var_update = {
-            "blueprint": json.dumps(updated_blueprint)
-        }
-        api_request("PATCH", f"/scenarios/{scenario_id}", var_update)
-        print(f"  Установлено {len(active_vars)} переменных:")
-        for k in active_vars:
-            masked = active_vars[k][:8] + "..." if len(active_vars[k]) > 8 else "***"
-            print(f"    - {k}: {masked}")
-    else:
-        print("  Переменные не заданы — заполните их в .env файле!")
-
-    # 4. Проверяем статус
-    print("\n[4/5] Проверяю сценарий...")
-    check = api_request("GET", f"/scenarios/{scenario_id}")
-    scenario_info = check.get("scenario", check)
-    print(f"  Статус: {scenario_info.get('islinked', 'unknown')}")
-    print(f"  Модулей: {scenario_info.get('usedPackages', 'N/A')}")
-
-    # 5. Готово
-    print("\n[5/5] Готово!")
-    print(f"\n  Откройте сценарий в браузере:")
-    print(f"  https://{MAKE_ZONE}.make.com/scenarios/{scenario_id}")
     print(f"\n  Следующие шаги:")
-    print(f"  1. Откройте сценарий и проверьте модули")
-    print(f"  2. Заполните пустые переменные (если есть)")
+    print(f"  1. Откройте каждый сценарий и проверьте модули")
+    print(f"  2. Настройте подключения (connections) для каждого модуля")
     print(f"  3. Нажмите 'Run once' для тестового запуска")
-    print(f"  4. Включите сценарий (ON)")
+    print(f"  4. Включите сценарии (ON)")
     print("=" * 50)
 
 
